@@ -1,5 +1,4 @@
-package com.example.medication.features.Auth.presentation.components
-
+package com.example.medication.features.medication.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,24 +18,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 private val Purple = Color(0xFF6650A4)
 
 @Composable
-fun LoginForm(
+fun RegisterForm(
     usuario: String,
     contrasena: String,
+    repetirContrasena: String,
     isLoading: Boolean,
     errorMessage: String?,
     onUsuarioChange: (String) -> Unit,
     onContrasenaChange: (String) -> Unit,
-    onIngresar: () -> Unit,
-    onRegistrar: () -> Unit
+    onRepetirContrasenaChange: (String) -> Unit,
+    onCrearUsuario: () -> Unit
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
+    var repeatPasswordVisible by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -54,7 +54,7 @@ fun LoginForm(
         ) {
 
             Text(
-                text = "Inicio de Sesion",
+                text = "Registro",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -104,12 +104,47 @@ fun LoginForm(
                 trailingIcon = {
                     Icon(
                         imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                        contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                        contentDescription = null,
                         tint = Color.Gray,
                         modifier = Modifier.clickable { passwordVisible = !passwordVisible }
                     )
                 },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Purple,
+                    unfocusedBorderColor = Color(0xFFCCCCCC),
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campo Repetir Contraseña
+            OutlinedTextField(
+                value = repetirContrasena,
+                onValueChange = onRepetirContrasenaChange,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                placeholder = { Text("Repetir Contraseña", color = Color.Gray) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = "Repetir Contraseña",
+                        tint = Purple
+                    )
+                },
+                trailingIcon = {
+                    Icon(
+                        imageVector = if (repeatPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier.clickable { repeatPasswordVisible = !repeatPasswordVisible }
+                    )
+                },
+                visualTransformation = if (repeatPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -132,9 +167,9 @@ fun LoginForm(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = onIngresar,
+                onClick = onCrearUsuario,
                 modifier = Modifier
-                    .fillMaxWidth(0.6f)
+                    .fillMaxWidth(0.7f)
                     .height(44.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Purple),
@@ -148,30 +183,12 @@ fun LoginForm(
                     )
                 } else {
                     Text(
-                        text = "Ingresar",
+                        text = "Crear Usuario",
                         color = Color.White,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Row {
-                Text(
-                    text = "¿No tienes cuenta? ",
-                    fontSize = 13.sp,
-                    color = Color.DarkGray
-                )
-                Text(
-                    text = "Registrar",
-                    fontSize = 13.sp,
-                    color = Purple,
-                    fontWeight = FontWeight.SemiBold,
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable { onRegistrar() }
-                )
             }
         }
     }
