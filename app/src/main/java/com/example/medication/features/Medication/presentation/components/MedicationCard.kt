@@ -1,4 +1,4 @@
-package com.example.medication.features.medication.presentation.components
+package com.example.medication.features.Medication.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.medication.features.medication.domain.model.Medication
+import com.example.medication.features.Medication.domain.model.Medication
 
 
 @Composable

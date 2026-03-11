@@ -1,4 +1,4 @@
-package com.example.medication.features.medication.presentation.screens
+package com.example.medication.features.Medication.presentation.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.medication.features.medication.presentation.components.RegisterMedicationForm
+import com.example.medication.features.Medication.presentation.components.RegisterMedicationForm
 
 @Composable
 fun RegisterMedicationScreen(){

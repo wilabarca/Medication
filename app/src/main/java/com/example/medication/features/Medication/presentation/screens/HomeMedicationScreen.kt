@@ -1,4 +1,4 @@
-package com.example.medication.features.medication.presentation.screens
+package com.example.medication.features.Medication.presentation.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,8 +11,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.medication.features.medication.domain.model.Medication
-import com.example.medication.features.medication.presentation.components.MedicationCard
+import com.example.medication.features.Medication.domain.model.Medication
+import com.example.medication.features.Medication.presentation.components.MedicationCard
 import androidx.compose.foundation.lazy.items
 
 
