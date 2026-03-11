@@ -1,4 +1,4 @@
-package com.example.medication.features.Auth.presentation.components
+package com.example.medication.features.auth.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
