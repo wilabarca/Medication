@@ -1,4 +1,5 @@
-package com.example.medication.features.Auth.presentation.screens
+package com.example.medication.features.auth.presentation.screens
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -6,15 +7,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.example.medication.features.Auth.presentation.components.RegisterForm
+import com.example.medication.features.auth.presentation.components.LoginForm
 
 @Composable
-fun RegisterScreen(
-    onRegisterSuccess: () -> Unit
+fun LoginScreen(
+    onLoginSuccess: () -> Unit,
+    onRegistrar: () -> Unit
 ) {
     var usuario by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
-    var repetirContrasena by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -22,19 +23,18 @@ fun RegisterScreen(
             .background(Color(0xFF1A1A2E)),
         contentAlignment = Alignment.Center
     ) {
-        RegisterForm(
+        LoginForm(
             usuario = usuario,
             contrasena = contrasena,
-            repetirContrasena = repetirContrasena,
             isLoading = false,
             errorMessage = null,
             onUsuarioChange = { usuario = it },
             onContrasenaChange = { contrasena = it },
-            onRepetirContrasenaChange = { repetirContrasena = it },
-            onCrearUsuario = {
+            onIngresar = {
                 // TODO: conectar con ViewModel cuando tengas la API
-                onRegisterSuccess()
-            }
+                onLoginSuccess()
+            },
+            onRegistrar = onRegistrar
         )
     }
 }

@@ -60,8 +60,14 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
 
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
 
     implementation(libs.hilt.android)
+    implementation(libs.firebase.firestore.ktx)
     ksp(libs.hilt.compiler)
 
     // Room
