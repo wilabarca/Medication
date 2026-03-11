@@ -1,4 +1,4 @@
-package com.example.medication.features.medication.presentation.viewmodels
+package com.example.medication.features.Medication.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
