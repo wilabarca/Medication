@@ -12,4 +12,6 @@ fun MedicationDto.toDomain(): Medication {
         price = this.price
     )
 }
-
+fun List<MedicationDto>.toDomainList(): List<Medication> {
+    return map { it.toDomain() }
+}

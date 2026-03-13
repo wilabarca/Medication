@@ -6,22 +6,21 @@ import com.example.medication.features.medication.data.datasources.remote.mapper
 import com.example.medication.features.medication.data.datasources.remote.models.CreateMedicationRequest
 import com.example.medication.features.medication.data.datasources.remote.models.UpdateMedicationRequest
 import com.example.medication.features.medication.domain.entities.Medication
+import com.example.medication.features.medication.data.datasources.remote.mapper.toDomainList
 import com.example.medication.features.medication.domain.repositories.MedicationRepository
 import javax.inject.Inject
 
 
 class MedicationRepositoryImpl @Inject constructor(
-private val api: MedicationApi
+    private val api: MedicationApi
 ) : MedicationRepository {
 
     override suspend fun getMedications(): List<Medication> {
-        val response = api.getMedications()
-        return response.map { it.toDomain() }
+        return api.getMedications().toDomainList()
     }
 
     override suspend fun getMedicationById(id: String): Medication {
-        val response = api.getMedicationById(id)
-        return response.toDomain()
+        return api.getMedicationById(id).toDomain()
     }
 
     override suspend fun createMedication(
@@ -30,10 +29,13 @@ private val api: MedicationApi
         quantity: Int,
         price: Double
     ): Medication {
-        val response = api.createMedication(
-            CreateMedicationRequest(name, description, quantity, price)
+        val request = CreateMedicationRequest(
+            name = name,
+            description = description,
+            quantity = quantity,
+            price = price
         )
-        return response.toDomain()
+        return api.createMedication(request).toDomain()
     }
 
     override suspend fun updateMedication(
@@ -43,11 +45,13 @@ private val api: MedicationApi
         quantity: Int,
         price: Double
     ): Medication {
-        val response = api.updateMedication(
-            id,
-            UpdateMedicationRequest(name, description, quantity, price)
+        val request = UpdateMedicationRequest(
+            name = name,
+            description = description,
+            quantity = quantity,
+            price = price
         )
-        return response.toDomain()
+        return api.updateMedication(id, request).toDomain()
     }
 
     override suspend fun deleteMedication(id: String) {
