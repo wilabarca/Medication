@@ -13,37 +13,69 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.medication.features.medication.presentation.components.MedicationCard
 import androidx.compose.foundation.lazy.items
-import com.example.medication.features.medication.domain.entities.Medication
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import com.example.medication.features.medication.presentation.viewmodels.HomeViewModel
 
 
 @Composable
-fun HomeMedicationScreen(){
-    val medications = listOf(
-        Medication("Paracetamol", "12", "9"),
-        Medication("Ibuprofeno","13","2")
-    )
+fun HomeMedicationScreen(
+    onNavigateToRegister: () -> Unit = {},
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getMedications()
+    }
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick  = {}
+                onClick = onNavigateToRegister
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar")
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Agregar"
+                )
             }
         }
-    ) {
-        padding ->
+    ) { padding ->
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            items(medications){
-                medication ->
-                MedicationCard(medication)
+        when {
+            state.isLoading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.padding(padding)
+                )
+            }
+
+            state.error != null -> {
+                Text(
+                    text = state.error ?: "Error",
+                    modifier = Modifier.padding(padding)
+                )
+            }
+
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(16.dp)
+                ) {
+                    items(state.medications) { medication ->
+                        MedicationCard(
+                            medication = medication
+                        )
+                    }
+                }
             }
         }
     }
 }
+

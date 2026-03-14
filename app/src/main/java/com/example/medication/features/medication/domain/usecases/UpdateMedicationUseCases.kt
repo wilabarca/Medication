@@ -1,20 +1,22 @@
 package com.example.medication.features.medication.domain.usecases
 
-
 import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.domain.repositories.MedicationRepository
 import javax.inject.Inject
 
-class PostMedicationUseCase @Inject constructor(
+
+class UpdateMedicationUseCase @Inject constructor(
     private val repository: MedicationRepository
 ) {
     suspend operator fun invoke(
+        id: String,
         name: String,
         description: String,
         quantity: Int,
         price: Double
     ): Medication {
-        return repository.createMedication(
+        return repository.updateMedication(
+            id = id,
             name = name,
             description = description,
             quantity = quantity,
