@@ -1,7 +1,5 @@
 package com.example.medication.features.medication.domain.usecases
 
-
-import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.domain.repositories.MedicationRepository
 import javax.inject.Inject
 
@@ -13,8 +11,8 @@ class PostMedicationUseCase @Inject constructor(
         description: String,
         quantity: Int,
         price: Double
-    ): Medication {
-        return repository.createMedication(
+    ) {
+        repository.createMedication(
             name = name,
             description = description,
             quantity = quantity,

@@ -2,7 +2,7 @@ package com.example.medication.features.medication.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.medication.features.medication.domain.usecases.PostMedicationUseCase
+import com.example.medication.features.medication.domain.usecases.UpdateMedicationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class RegisterMedicationUiState(
+data class EditMedicationUiState(
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
     val successMessage: String? = null,
@@ -18,14 +18,15 @@ data class RegisterMedicationUiState(
 )
 
 @HiltViewModel
-class RegisterMedicationViewModel @Inject constructor(
-    private val postMedicationUseCase: PostMedicationUseCase
+class EditMedicationViewModel @Inject constructor(
+    private val updateMedicationUseCase: UpdateMedicationUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(RegisterMedicationUiState())
-    val uiState: StateFlow<RegisterMedicationUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(EditMedicationUiState())
+    val uiState: StateFlow<EditMedicationUiState> = _uiState.asStateFlow()
 
-    fun registerMedication(
+    fun updateMedication(
+        id: String,
         name: String,
         description: String,
         quantity: Int,
@@ -35,34 +36,32 @@ class RegisterMedicationViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
                 isSuccess = false,
-                successMessage = null,
                 error = null
             )
-
             try {
-                postMedicationUseCase(
+                updateMedicationUseCase(
+                    id = id,
                     name = name,
                     description = description,
                     quantity = quantity,
                     price = price
                 )
-
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     isSuccess = true,
-                    successMessage = "✅ Medicamento \"$name\" registrado correctamente"
+                    successMessage = "✅ Medicamento \"$name\" actualizado correctamente"
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     isSuccess = false,
-                    error = "❌ Error al registrar: ${e.message ?: "Error desconocido"}"
+                    error = "❌ Error al actualizar: ${e.message ?: "Error desconocido"}"
                 )
             }
         }
     }
 
     fun resetState() {
-        _uiState.value = RegisterMedicationUiState()
+        _uiState.value = EditMedicationUiState()
     }
 }
