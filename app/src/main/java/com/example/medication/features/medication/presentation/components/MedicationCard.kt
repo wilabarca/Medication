@@ -96,7 +96,6 @@ fun MedicationCard(
                     onUpdate = { name, quantity, price, description ->
                         val quantityInt = quantity.toIntOrNull() ?: return@EditMedicationForm
                         val priceDouble = price.toDoubleOrNull() ?: return@EditMedicationForm
-                        // ✅ id, name, description, quantity, price — orden correcto
                         onUpdate(medication.id, name, description, quantityInt, priceDouble)
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             showEditSheet = false

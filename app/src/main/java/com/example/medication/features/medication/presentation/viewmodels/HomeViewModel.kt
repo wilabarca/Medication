@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 data class HomeMedicationUiState(
     val medications: List<Medication> = emptyList(),
     val isLoading: Boolean = false,
@@ -24,7 +23,7 @@ data class HomeMedicationUiState(
 class HomeViewModel @Inject constructor(
     private val getMedicationUseCase: GetMedicationUseCase,
     private val deleteMedicationUseCase: DeleteMedicationUseCase,
-    private val updateMedicationUseCase: UpdateMedicationUseCase  // ← agregado
+    private val updateMedicationUseCase: UpdateMedicationUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeMedicationUiState())
@@ -64,7 +63,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // ← agregado
     fun updateMedication(
         id: String,
         name: String,

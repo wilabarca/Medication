@@ -94,7 +94,6 @@ fun HomeMedicationScreen(
                                 onDelete = { id ->
                                     viewModel.deleteMedication(id)
                                 },
-                                // ✅ CORREGIDO — antes faltaba este parámetro
                                 onUpdate = { id, name, description, quantity, price ->
                                     viewModel.updateMedication(id, name, description, quantity, price)
                                 }
