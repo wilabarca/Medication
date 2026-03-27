@@ -3,10 +3,10 @@ package com.example.medication.features.auth.data.repositories
 
 import android.provider.ContactsContract
 import com.example.medication.features.auth.data.dataresources.remote.api.AuthApi
-import com.example.medication.features.auth.data.dataresources.remote.mapper.toDomain
 import com.example.medication.features.auth.data.dataresources.remote.models.LoginRequest
 import com.example.medication.features.auth.data.dataresources.remote.models.RegisterRequest
 import com.example.medication.features.auth.domain.entities.User
+import com.example.medication.features.auth.data.dataresources.remote.mapper.toDomain
 import com.example.medication.features.auth.domain.repositories.UserRepository
 import javax.inject.Inject
 
@@ -17,11 +17,11 @@ class UserRepositoryImpl @Inject constructor(
     override  suspend fun login(
         email: String,
         password: String
-    ): User {
+    ): String {
         val response = api.login(
             LoginRequest(email, password)
         )
-        return response.toDomain()
+        return response.token
     }
 
     override suspend fun register(

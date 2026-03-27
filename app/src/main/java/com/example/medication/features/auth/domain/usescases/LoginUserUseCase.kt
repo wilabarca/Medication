@@ -12,7 +12,7 @@ class LoginUserUseCase @Inject constructor(
     suspend operator fun invoke(
         email: String,
         password: String
-    ): User{
+    ): String{
         return repository.login(email, password)
     }
 }

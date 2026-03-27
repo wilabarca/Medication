@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
@@ -52,9 +53,8 @@ fun LoginForm(
                 .padding(horizontal = 28.dp, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Text(
-                text = "Inicio de Sesion",
+                text = "Inicio de sesión",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -62,20 +62,20 @@ fun LoginForm(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Campo Usuario
             OutlinedTextField(
                 value = usuario,
                 onValueChange = onUsuarioChange,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                placeholder = { Text("Usuario", color = Color.Gray) },
+                placeholder = { Text("Correo electrónico", color = Color.Gray) },
                 leadingIcon = {
                     Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = "Usuario",
+                        imageVector = Icons.Filled.Email,
+                        contentDescription = "Correo electrónico",
                         tint = Purple
                     )
                 },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Purple,
@@ -87,7 +87,6 @@ fun LoginForm(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Contraseña
             OutlinedTextField(
                 value = contrasena,
                 onValueChange = onContrasenaChange,

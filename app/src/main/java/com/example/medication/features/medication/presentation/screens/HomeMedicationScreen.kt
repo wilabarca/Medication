@@ -19,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import com.example.medication.features.medication.presentation.viewmodels.HomeViewModel
 
 
@@ -41,7 +40,7 @@ fun HomeMedicationScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Agregar"
+                    contentDescription = "Agregar medicamento"
                 )
             }
         }
@@ -78,4 +77,3 @@ fun HomeMedicationScreen(
         }
     }
 }
-

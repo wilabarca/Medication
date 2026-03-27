@@ -59,14 +59,6 @@ class RegisterMedicationViewModel @Inject constructor(
         }
     }
 
-    private fun postMedicationUseCase(
-        name: String,
-        description: String,
-        quantity: Int,
-        price: Double
-    ) {
-    }
-
     fun resetState() {
         _uiState.value = RegisterMedicationUiState()
     }

@@ -6,11 +6,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.medication.features.medication.presentation.components.RegisterMedicationForm
@@ -23,6 +23,13 @@ fun RegisterMedicationScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
+            viewModel.resetState()
+            onMedicationRegistered()
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -32,10 +39,6 @@ fun RegisterMedicationScreen(
         when {
             state.isLoading -> {
                 CircularProgressIndicator()
-            }
-
-            state.isSuccess -> {
-                onMedicationRegistered()
             }
 
             else -> {

@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.google.services)
 
 }
 
@@ -66,6 +65,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.compose.runtime)
     ksp(libs.hilt.compiler)
 
     // Room
@@ -81,6 +81,4 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
-    // Firebase
-    implementation(libs.firebase.firestore.ktx)
 }
