@@ -1,15 +1,13 @@
 package com.example.medication.features.medication.data.repositories
 
-
 import com.example.medication.features.medication.data.datasources.remote.api.MedicationApi
 import com.example.medication.features.medication.data.datasources.remote.mapper.toDomain
+import com.example.medication.features.medication.data.datasources.remote.mapper.toDomainList
 import com.example.medication.features.medication.data.datasources.remote.models.CreateMedicationRequest
 import com.example.medication.features.medication.data.datasources.remote.models.UpdateMedicationRequest
 import com.example.medication.features.medication.domain.entities.Medication
-import com.example.medication.features.medication.data.datasources.remote.mapper.toDomainList
 import com.example.medication.features.medication.domain.repositories.MedicationRepository
 import javax.inject.Inject
-
 
 class MedicationRepositoryImpl @Inject constructor(
     private val api: MedicationApi
@@ -28,14 +26,14 @@ class MedicationRepositoryImpl @Inject constructor(
         description: String,
         quantity: Int,
         price: Double
-    ): Medication {
+    ) {
         val request = CreateMedicationRequest(
             name = name,
             description = description,
             quantity = quantity,
             price = price
         )
-        return api.createMedication(request).toDomain()
+        api.createMedication(request)
     }
 
     override suspend fun updateMedication(
