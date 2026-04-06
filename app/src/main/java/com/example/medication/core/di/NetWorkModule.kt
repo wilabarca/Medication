@@ -1,6 +1,8 @@
+
 package com.example.medication.core.di
 
 import com.example.medication.features.auth.data.dataresources.remote.api.AuthApi
+import com.example.medication.features.searchmedicines.data.remote.api.MedicineApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,7 +29,12 @@ object NetWorkModule {
     @Singleton
     fun provideAuthApi(
         @ApiMedicationRetrofit retrofit: Retrofit
-    ): AuthApi {
-        return retrofit.create(AuthApi::class.java)
-    }
+    ): AuthApi = retrofit.create(AuthApi::class.java)
+
+    // ← agregar esto
+    @Provides
+    @Singleton
+    fun provideMedicineApiService(
+        @ApiMedicationRetrofit retrofit: Retrofit
+    ): MedicineApiService = retrofit.create(MedicineApiService::class.java)
 }
