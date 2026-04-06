@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.medication.features.searchmedicines.presentation.screens.SearchMedicinesScreen
+import com.example.medication.features.searchmedication.presentation.screens.SearchMedicinesScreen
 import com.example.medication.features.auth.presentation.screens.LoginScreen
 import com.example.medication.features.auth.presentation.screens.RegisterScreen
 import com.example.medication.features.favorites.presentation.screens.FavoritesScreen

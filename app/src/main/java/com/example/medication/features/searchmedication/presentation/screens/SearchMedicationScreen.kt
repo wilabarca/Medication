@@ -1,4 +1,4 @@
-package com.example.medication.features.searchmedicines.presentation.screens
+package com.example.medication.features.searchmedication.presentation.screens
 
 import android.content.Context
 import android.os.Build
@@ -20,10 +20,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.medication.features.searchmedicines.domain.entities.Medicine
-import com.example.medication.features.searchmedicines.presentation.components.MedicineItem
-import com.example.medication.features.searchmedicines.presentation.components.MedicineSearchBar
-import com.example.medication.features.searchmedicines.presentation.viewmodels.SearchMedicinesViewModel
+import com.example.medication.features.searchmedication.domain.entities.Medication
+import com.example.medication.features.searchmedication.presentation.components.MedicineItem
+import com.example.medication.features.searchmedication.presentation.components.MedicineSearchBar
+import com.example.medication.features.searchmedication.presentation.viewmodels.SearchMedicinesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +82,6 @@ fun SearchMedicinesScreen(
                         CircularProgressIndicator()
                     }
                 }
-
                 uiState.errorMessage != null -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
@@ -93,7 +92,6 @@ fun SearchMedicinesScreen(
                         )
                     }
                 }
-
                 uiState.query.length >= 2 && uiState.results.isEmpty() -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -112,7 +110,6 @@ fun SearchMedicinesScreen(
                         }
                     }
                 }
-
                 uiState.query.isEmpty() -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -124,7 +121,7 @@ fun SearchMedicinesScreen(
                             )
                             Spacer(Modifier.height(12.dp))
                             Text(
-                                text = "Ingresa el nombre del medicamento\no principio activo",
+                                text = "Ingresa el nombre del medicamento",
                                 textAlign = TextAlign.Center,
                                 color = MaterialTheme.colorScheme.outline,
                                 modifier = Modifier.padding(horizontal = 32.dp)
@@ -132,7 +129,6 @@ fun SearchMedicinesScreen(
                         }
                     }
                 }
-
                 else -> {
                     Text(
                         text = "${uiState.results.size} resultado(s)",
@@ -146,7 +142,7 @@ fun SearchMedicinesScreen(
                     ) {
                         items(uiState.results, key = { it.id }) { medicine ->
                             MedicineItem(
-                                medicine = medicine,
+                                medication = medicine,
                                 onClick = {
                                     vibrateDevice()
                                     viewModel.onMedicineSelected(it)
@@ -158,10 +154,9 @@ fun SearchMedicinesScreen(
             }
         }
 
-        // Dialog de detalle
-        uiState.selectedMedicine?.let { medicine ->
+        uiState.selectedMedication?.let { medicine ->
             MedicineDetailDialog(
-                medicine = medicine,
+                medication = medicine,
                 onDismiss = viewModel::onDismissDetail
             )
         }
@@ -170,27 +165,17 @@ fun SearchMedicinesScreen(
 
 @Composable
 private fun MedicineDetailDialog(
-    medicine: Medicine,
+    medication: Medication,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(medicine.name, fontWeight = FontWeight.Bold) },
+        title = { Text(medication.name, fontWeight = FontWeight.Bold) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                DetailRow("Principio activo", medicine.activeIngredient)
-                DetailRow("Presentación", medicine.presentation)
-                DetailRow("Dosis", medicine.dosage)
-                DetailRow(
-                    "Receta",
-                    if (medicine.requiresPrescription) "Requerida" else "No requerida"
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = medicine.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                DetailRow("Descripción", medication.description)
+                DetailRow("Cantidad disponible", medication.quantity.toString())
+                DetailRow("Precio", "$${medication.price}")
             }
         },
         confirmButton = {

@@ -2,7 +2,7 @@
 package com.example.medication.core.di
 
 import com.example.medication.features.auth.data.dataresources.remote.api.AuthApi
-import com.example.medication.features.searchmedicines.data.remote.api.MedicineApiService
+import com.example.medication.features.searchmedication.data.remote.api.MedicationApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,5 +36,5 @@ object NetWorkModule {
     @Singleton
     fun provideMedicineApiService(
         @ApiMedicationRetrofit retrofit: Retrofit
-    ): MedicineApiService = retrofit.create(MedicineApiService::class.java)
+    ): MedicationApiService = retrofit.create(MedicationApiService::class.java)
 }

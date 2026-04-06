@@ -1,29 +1,28 @@
-package com.example.medication.features.searchmedicines.presentation.components
+package com.example.medication.features.searchmedication.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material.icons.outlined.MedicalServices
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.medication.features.searchmedicines.domain.entities.Medicine
+import com.example.medication.features.searchmedication.domain.entities.Medication
 
 @Composable
 fun MedicineItem(
-    medicine: Medicine,
-    onClick: (Medicine) -> Unit,
+    medication: Medication,
+    onClick: (Medication) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
-            .clickable { onClick(medicine) },
+            .clickable { onClick(medication) },
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -38,27 +37,26 @@ fun MedicineItem(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = medicine.name,
+                    text = medication.name,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = medicine.activeIngredient,
+                    text = medication.description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2
                 )
                 Text(
-                    text = medicine.presentation,
+                    text = "Cantidad: ${medication.quantity} | Precio: $${medication.price}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
             }
             Icon(
-                imageVector = if (medicine.requiresPrescription)
-                    Icons.Outlined.Warning else Icons.Outlined.Info,
+                imageVector = Icons.Outlined.MedicalServices,
                 contentDescription = null,
-                tint = if (medicine.requiresPrescription)
-                    MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
         }

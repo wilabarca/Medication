@@ -5,12 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "search_medicines_cache")
 data class SearchMedicineEntity(
-    @PrimaryKey val id: Int,
+    @PrimaryKey val id: String,
     val name: String,
-    val activeIngredient: String,
-    val presentation: String,
-    val dosage: String,
-    val requiresPrescription: Boolean,
     val description: String,
+    val quantity: Int,
+    val price: Double,
     val cachedAt: Long = System.currentTimeMillis()
 )
