@@ -1,4 +1,3 @@
-// IsFavoriteUseCase.kt
 package com.example.medication.features.favorites.domain.usecases
 
 import com.example.medication.features.favorites.domain.repositories.FavoriteRepository

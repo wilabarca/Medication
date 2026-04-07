@@ -1,6 +1,7 @@
 package com.example.medication.features.searchmedication.data.di
 
-import com.example.medication.features.searchmedication.data.repository.MedicationRepositoryImpl
+import com.example.medication.features.searchmedication.data.datasources.remote.api.MedicationApiService
+import com.example.medication.features.searchmedication.data.repositories.MedicationRepositoryImpl
 import com.example.medication.features.searchmedication.domain.repositories.MedicationRepository
 import dagger.Binds
 import dagger.Module
@@ -14,7 +15,7 @@ abstract class SearchMedicationModule {
 
     @Binds
     @Singleton
-    abstract fun bindMedicineRepository(
+    abstract fun bindMedicationRepository(
         impl: MedicationRepositoryImpl
     ): MedicationRepository
 }

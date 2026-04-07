@@ -1,11 +1,9 @@
 package com.example.medication.features.searchmedication.presentation.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medication.features.searchmedication.domain.entities.Medication
-import com.example.medication.features.searchmedication.domain.repositories.MedicationRepository
-import com.example.medication.features.searchmedication.domain.usecases.SearchMedicationUseCase
+import com.example.medication.features.searchmedication.domain.usecases.SearchMedicationUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
@@ -23,8 +21,7 @@ data class SearchMedicinesUiState(
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class SearchMedicinesViewModel @Inject constructor(
-    private val searchMedicationUseCase: SearchMedicationUseCase,
-    private val repository: MedicationRepository
+    private val searchMedicationUseCases: SearchMedicationUseCases  // ← wrapper
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchMedicinesUiState())
@@ -33,39 +30,23 @@ class SearchMedicinesViewModel @Inject constructor(
     private val queryFlow = MutableStateFlow("")
 
     init {
-        Log.d("SEARCH_DEBUG", "🔧 ViewModel init arrancó")
+        // Sync al iniciar — igual que syncPosts() del profe
+        syncMedications()
 
+        // Flow de búsqueda reactivo
         viewModelScope.launch {
-            try {
-                Log.d("SEARCH_DEBUG", "⏳ Llamando ensureCacheLoaded...")
-                _uiState.update { it.copy(isLoading = true) }
-                repository.ensureCacheLoaded()
-                Log.d("SEARCH_DEBUG", "✅ ensureCacheLoaded terminó")
-                _uiState.update { it.copy(isLoading = false) }
-            } catch (e: Exception) {
-                Log.e("SEARCH_DEBUG", "❌ Error en ensureCacheLoaded: ${e.message}", e)
-                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
-            }
-        }
-
-        viewModelScope.launch {
-            Log.d("SEARCH_DEBUG", "🔧 Corrutina de búsqueda arrancó")
             queryFlow
                 .debounce(300L)
                 .distinctUntilChanged()
                 .flatMapLatest { query ->
-                    Log.d("SEARCH_DEBUG", "🔍 flatMapLatest query: '$query'")
                     _uiState.update { it.copy(isLoading = query.length >= 2) }
-                    searchMedicationUseCase(query)
+                    searchMedicationUseCases.searchMedication(query)
                         .catch { e ->
-                            Log.e("SEARCH_DEBUG", "❌ Error en búsqueda: ${e.message}", e)
                             _uiState.update { it.copy(errorMessage = e.message, isLoading = false) }
                             emit(emptyList())
                         }
                 }
                 .collect { medicines ->
-                    Log.d("SEARCH_DEBUG", "📋 Resultados recibidos: ${medicines.size}")
-                    medicines.forEach { Log.d("SEARCH_DEBUG", "  → ${it.name}") }
                     _uiState.update {
                         it.copy(results = medicines, isLoading = false, errorMessage = null)
                     }
@@ -73,8 +54,16 @@ class SearchMedicinesViewModel @Inject constructor(
         }
     }
 
+    // Igual que syncPosts() del profe
+    fun syncMedications() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            searchMedicationUseCases.syncMedications()
+            _uiState.update { it.copy(isLoading = false) }
+        }
+    }
+
     fun onQueryChanged(query: String) {
-        Log.d("SEARCH_DEBUG", "✏️ onQueryChanged: '$query'")
         _uiState.update { it.copy(query = query) }
         queryFlow.value = query
     }
@@ -88,7 +77,6 @@ class SearchMedicinesViewModel @Inject constructor(
     }
 
     fun onClearSearch() {
-        Log.d("SEARCH_DEBUG", "🗑️ onClearSearch")
         _uiState.update { SearchMedicinesUiState() }
         queryFlow.value = ""
     }

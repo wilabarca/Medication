@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.medication.core.database.entities.FavoriteEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FavoriteDao {
@@ -16,7 +17,7 @@ interface FavoriteDao {
     suspend fun removeFavorite(id: String)
 
     @Query("SELECT * FROM favorites")
-    suspend fun getAllFavorites(): List<FavoriteEntity>
+    fun getAllFavorites(): Flow<List<FavoriteEntity>>  // ← Flow reactivo
 
     @Query("SELECT EXISTS(SELECT 1 FROM favorites WHERE id = :id)")
     suspend fun isFavorite(id: String): Boolean

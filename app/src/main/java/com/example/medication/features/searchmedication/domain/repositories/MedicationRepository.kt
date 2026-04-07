@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface MedicationRepository {
     fun searchMedicines(query: String): Flow<List<Medication>>
-    suspend fun ensureCacheLoaded()
+    suspend fun syncMedications()
     suspend fun getMedicineById(id: String): Medication?
     suspend fun clearCache()
 }

@@ -1,4 +1,4 @@
-package com.example.medication.features.favorites.data.di
+package com.example.medication.features.favorites.di
 
 import com.example.medication.features.favorites.data.repositories.FavoriteRepositoryImpl
 import com.example.medication.features.favorites.domain.repositories.FavoriteRepository
