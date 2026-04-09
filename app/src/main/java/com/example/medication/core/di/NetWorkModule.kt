@@ -10,16 +10,18 @@ import javax.inject.Singleton
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+
+
 @Module
 @InstallIn(SingletonComponent::class)
 object NetWorkModule {
-
     @Provides
     @Singleton
     @ApiMedicationRetrofit
     fun provideRetrofit(): Retrofit {
+
         return Retrofit.Builder()
-            .baseUrl("http://18.235.240.52:3000/")
+            .baseUrl("http://192.168.0.11:3000/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -28,6 +30,12 @@ object NetWorkModule {
     @Singleton
     fun provideAuthApi(
         @ApiMedicationRetrofit retrofit: Retrofit
+<<<<<<< Luis_conexion
+    ): AuthApi {
+        return retrofit.create(AuthApi::class.java)
+    }
+
+=======
     ): AuthApi = retrofit.create(AuthApi::class.java)
 
     @Provides
@@ -35,4 +43,5 @@ object NetWorkModule {
     fun provideMedicineApiService(
         @ApiMedicationRetrofit retrofit: Retrofit
     ): MedicationApiService = retrofit.create(MedicationApiService::class.java)
+>>>>>>> main
 }

@@ -4,18 +4,31 @@ package com.example.medication.features.auth.presentation.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.medication.features.auth.presentation.components.LoginForm
+import com.example.medication.features.auth.presentation.viewmodels.AuthViewModel
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onRegistrar: () -> Unit
+    onRegistrar: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
-    var usuario by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
+    var usuario by rememberSaveable { mutableStateOf("") }
+    var contrasena by rememberSaveable { mutableStateOf("") }
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState.loginSuccess) {
+        if (uiState.loginSuccess) {
+            viewModel.consumeLoginSuccess()
+            onLoginSuccess()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -26,13 +39,18 @@ fun LoginScreen(
         LoginForm(
             usuario = usuario,
             contrasena = contrasena,
-            isLoading = false,
-            errorMessage = null,
-            onUsuarioChange = { usuario = it },
-            onContrasenaChange = { contrasena = it },
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.errorMessage,
+            onUsuarioChange = {
+                usuario = it
+                if (uiState.errorMessage != null) viewModel.clearError()
+            },
+            onContrasenaChange = {
+                contrasena = it
+                if (uiState.errorMessage != null) viewModel.clearError()
+            },
             onIngresar = {
-                // TODO: conectar con ViewModel cuando tengas la API
-                onLoginSuccess()
+                viewModel.login(usuario, contrasena)
             },
             onRegistrar = onRegistrar
         )

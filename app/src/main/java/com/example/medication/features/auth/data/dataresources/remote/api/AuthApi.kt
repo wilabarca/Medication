@@ -17,13 +17,13 @@ interface AuthApi {
     @POST("users/login")
     suspend fun login(
         @Body request: LoginRequest
-    ): UserDto
+    ): LoginResponse
 
     @PUT("users/{id}")
     suspend fun updateUser(
         @Path("id") id: String,
         @Body request: UpdateUserRequest
-    ): UserDto
+    ): LoginResponse
 
     @DELETE("users/{id}")
     suspend fun deleteUser(

@@ -44,6 +44,13 @@ fun RegisterMedicationScreen(
         }
     }
 
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
+            viewModel.resetState()
+            onMedicationRegistered()
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()

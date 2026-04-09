@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
@@ -26,11 +27,13 @@ private val Purple = Color(0xFF6650A4)
 @Composable
 fun RegisterForm(
     usuario: String,
+    correo: String,
     contrasena: String,
     repetirContrasena: String,
     isLoading: Boolean,
     errorMessage: String?,
     onUsuarioChange: (String) -> Unit,
+    onCorreoChange: (String) -> Unit,
     onContrasenaChange: (String) -> Unit,
     onRepetirContrasenaChange: (String) -> Unit,
     onCrearUsuario: () -> Unit
@@ -52,7 +55,6 @@ fun RegisterForm(
                 .padding(horizontal = 28.dp, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Text(
                 text = "Registro",
                 fontSize = 22.sp,
@@ -62,17 +64,16 @@ fun RegisterForm(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Campo Usuario
             OutlinedTextField(
                 value = usuario,
                 onValueChange = onUsuarioChange,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                placeholder = { Text("Usuario", color = Color.Gray) },
+                placeholder = { Text("Nombre", color = Color.Gray) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Person,
-                        contentDescription = "Usuario",
+                        contentDescription = "Nombre",
                         tint = Purple
                     )
                 },
@@ -87,7 +88,31 @@ fun RegisterForm(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Contraseña
+            OutlinedTextField(
+                value = correo,
+                onValueChange = onCorreoChange,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                placeholder = { Text("Correo electrónico", color = Color.Gray) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Email,
+                        contentDescription = "Correo electrónico",
+                        tint = Purple
+                    )
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Purple,
+                    unfocusedBorderColor = Color(0xFFCCCCCC),
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = contrasena,
                 onValueChange = onContrasenaChange,
@@ -122,17 +147,16 @@ fun RegisterForm(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo Repetir Contraseña
             OutlinedTextField(
                 value = repetirContrasena,
                 onValueChange = onRepetirContrasenaChange,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                placeholder = { Text("Repetir Contraseña", color = Color.Gray) },
+                placeholder = { Text("Repetir contraseña", color = Color.Gray) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Lock,
-                        contentDescription = "Repetir Contraseña",
+                        contentDescription = "Repetir contraseña",
                         tint = Purple
                     )
                 },
