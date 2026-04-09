@@ -8,7 +8,9 @@ import com.example.medication.features.searchmedication.presentation.screens.Sea
 import com.example.medication.features.auth.presentation.screens.LoginScreen
 import com.example.medication.features.auth.presentation.screens.RegisterScreen
 import com.example.medication.features.favorites.presentation.screens.FavoritesScreen
+import com.example.medication.features.medication.presentation.screens.AlarmScreens
 import com.example.medication.features.medication.presentation.screens.HomeMedicationScreen
+import com.example.medication.features.medication.presentation.screens.RegisterAlarmScreen
 import com.example.medication.features.medication.presentation.screens.RegisterMedicationScreen
 
 @Composable
@@ -19,7 +21,6 @@ fun NavigationApp() {
         navController = navController,
         startDestination = "Login"
     ) {
-
         composable("Login") {
             LoginScreen(
                 onLoginSuccess = {
@@ -27,12 +28,9 @@ fun NavigationApp() {
                         popUpTo("Login") { inclusive = true }
                     }
                 },
-                onRegistrar = {
-                    navController.navigate("Register")
-                }
+                onRegistrar = { navController.navigate("Register") }
             )
         }
-
         composable("Register") {
             RegisterScreen(
                 onRegisterSuccess = {
@@ -42,46 +40,41 @@ fun NavigationApp() {
                 }
             )
         }
-
         composable("Home") {
             HomeMedicationScreen(
-                onNavigateToRegister = {
-                    navController.navigate("RegisterMedication")
-                },
-                onNavigateToSearch = {
-                    navController.navigate("Search")
-                },
-                onNavigateToFavorites = {
-                    navController.navigate("Favorites")
-                }
+                onNavigateToRegister = { navController.navigate("RegisterMedication") },
+                onNavigateToSearch = { navController.navigate("Search") },
+                onNavigateToFavorites = { navController.navigate("Favorites") },
+                onNavigateToAlarm = { navController.navigate("Alarm") }
             )
         }
-
         composable("RegisterMedication") {
             RegisterMedicationScreen(
-                onMedicationRegistered = {
-                    navController.popBackStack()
-                }
+                onMedicationRegistered = { navController.popBackStack() }
             )
         }
-
         composable("Search") {
             SearchMedicinesScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
+                onBack = { navController.popBackStack() }
             )
         }
-
         composable("Favorites") {
             FavoritesScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
+                onBack = { navController.popBackStack() }
             )
         }
-
-
+        composable("Alarm") {
+            AlarmScreens(
+                onBack = { navController.popBackStack() },      // ✅ agregado
+                onAddAlarm = { navController.navigate("RegisterAlarm") },
+                onCalendarClick = { }
+            )
+        }
+        composable("RegisterAlarm") {
+            RegisterAlarmScreen(
+                onBack = { navController.popBackStack() },
+                onAlarmSaved = { navController.popBackStack() }
+            )
+        }
     }
-
 }

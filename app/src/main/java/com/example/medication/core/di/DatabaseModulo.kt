@@ -6,6 +6,7 @@ import com.example.medication.core.database.AppDatabase
 import com.example.medication.core.database.dao.FavoriteDao
 import com.example.medication.core.database.dao.MedicationDao
 import com.example.medication.core.database.dao.SearchMedicineDao
+import com.example.medication.features.medication.data.datasources.local.alarm.dao.MedicationAlarmDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,16 +34,17 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideMedicationDao(db: AppDatabase): MedicationDao =
-        db.medicationDao()
+    fun provideMedicationDao(db: AppDatabase): MedicationDao = db.medicationDao()
 
     @Provides
     @Singleton
-    fun provideFavoriteDao(db: AppDatabase): FavoriteDao =
-        db.favoriteDao()
+    fun provideFavoriteDao(db: AppDatabase): FavoriteDao = db.favoriteDao()
 
     @Provides
     @Singleton
-    fun provideSearchMedicineDao(db: AppDatabase): SearchMedicineDao =
-        db.searchMedicineDao()
+    fun provideSearchMedicineDao(db: AppDatabase): SearchMedicineDao = db.searchMedicineDao()
+
+    @Provides
+    @Singleton
+    fun provideMedicationAlarmDao(db: AppDatabase): MedicationAlarmDao = db.medicationAlarmDao()  // ✅
 }

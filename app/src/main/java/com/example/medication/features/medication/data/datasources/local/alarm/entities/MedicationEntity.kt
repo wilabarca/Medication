@@ -3,16 +3,17 @@ package com.example.medication.features.medication.data.datasources.local.alarm.
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import com.example.medication.features.medication.data.datasources.local.converters.AlarmConverters
 
 @Entity(
     tableName = "medications_alarms",
-    indices = [
-        Index(value = ["MedicationId"])
-    ]
-    )
+    indices = [Index(value = ["medicationId"])]  // ✅ minúscula
+)
+@TypeConverters(AlarmConverters::class)
 data class MedicationAlarmEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: String ,
+    val id: Long = 0,              // ✅ Long para autoGenerate
     val medicationId: String,
     val medicationName: String,
     val startDateMillis: Long,

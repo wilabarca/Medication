@@ -1,27 +1,25 @@
 package com.example.medication.core.di
 
 import com.example.medication.features.auth.data.dataresources.remote.api.AuthApi
-import com.example.medication.features.searchmedication.data.datasources.remote.api.MedicationApiService // ← nuevo paquete
+import com.example.medication.features.searchmedication.data.datasources.remote.api.MedicationApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-
-
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetWorkModule {
+
     @Provides
     @Singleton
     @ApiMedicationRetrofit
     fun provideRetrofit(): Retrofit {
-
         return Retrofit.Builder()
-            .baseUrl("http://192.168.0.11:3000/")
+            .baseUrl("http://18.235.240.52:3000/")  // ✅ EC2
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -30,12 +28,6 @@ object NetWorkModule {
     @Singleton
     fun provideAuthApi(
         @ApiMedicationRetrofit retrofit: Retrofit
-<<<<<<< Luis_conexion
-    ): AuthApi {
-        return retrofit.create(AuthApi::class.java)
-    }
-
-=======
     ): AuthApi = retrofit.create(AuthApi::class.java)
 
     @Provides
@@ -43,5 +35,4 @@ object NetWorkModule {
     fun provideMedicineApiService(
         @ApiMedicationRetrofit retrofit: Retrofit
     ): MedicationApiService = retrofit.create(MedicationApiService::class.java)
->>>>>>> main
 }

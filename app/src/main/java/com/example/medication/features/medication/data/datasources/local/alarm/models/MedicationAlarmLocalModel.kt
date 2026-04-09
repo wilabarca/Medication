@@ -1,7 +1,7 @@
 package com.example.medication.features.medication.data.datasources.local.alarm.models
 
 data class MedicationAlarmLocalModel(
-    val id: String ,
+    val id: Long = 0,  // ✅ Long
     val medicationId: String,
     val medicationName: String,
     val startDateMillis: Long,

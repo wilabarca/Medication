@@ -1,13 +1,11 @@
 package com.example.medication.features.medication.data.datasources.local.alarm.mapper
 
-import com.example.medication.core.database.entities.MedicationEntity
 import com.example.medication.features.medication.data.datasources.local.alarm.entities.MedicationAlarmEntity
 import com.example.medication.features.medication.data.datasources.local.alarm.models.MedicationAlarmLocalModel
 
-
-fun MedicationAlarmEntity.toLocalModel(): MedicationAlarmLocalModel{
+fun MedicationAlarmEntity.toLocalModel(): MedicationAlarmLocalModel {
     return MedicationAlarmLocalModel(
-        id = id,
+        id = id,                        // ✅ Long
         medicationId = medicationId,
         medicationName = medicationName,
         startDateMillis = startDateMillis,
@@ -23,9 +21,9 @@ fun MedicationAlarmEntity.toLocalModel(): MedicationAlarmLocalModel{
     )
 }
 
-fun MedicationAlarmLocalModel.toEntity(): MedicationAlarmEntity{
+fun MedicationAlarmLocalModel.toEntity(): MedicationAlarmEntity {
     return MedicationAlarmEntity(
-        id = id,
+        id = id,                        // ✅ Long
         medicationId = medicationId,
         medicationName = medicationName,
         startDateMillis = startDateMillis,

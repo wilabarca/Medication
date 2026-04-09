@@ -8,20 +8,16 @@ import androidx.room.Update
 import com.example.medication.features.medication.data.datasources.local.alarm.entities.MedicationAlarmEntity
 import kotlinx.coroutines.flow.Flow
 
-
 @Dao
 interface MedicationAlarmDao {
+
     @Query("SELECT * FROM medications_alarms ORDER BY createdAt DESC")
     fun getAllAlarms(): Flow<List<MedicationAlarmEntity>>
 
     @Query("SELECT * FROM medications_alarms WHERE id = :alarmId LIMIT 1")
     suspend fun getAlarmById(alarmId: Long): MedicationAlarmEntity?
 
-    @Query("""
-        SELECT * FROM medications_alarms
-        WHERE medicationId = :medicationId
-        ORDER BY createdAt DESC
-    """)
+    @Query("SELECT * FROM medications_alarms WHERE medicationId = :medicationId ORDER BY createdAt DESC")
     fun getAlarmsByMedicationId(medicationId: String): Flow<List<MedicationAlarmEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
