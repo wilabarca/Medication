@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,7 +36,9 @@ import kotlinx.coroutines.launch
 fun MedicationCard(
     medication: Medication,
     onDelete: (String) -> Unit = {},
-    onUpdate: (String, String, String, Int, Double) -> Unit = { _, _, _, _, _ -> }
+    onUpdate: (String, String, String, Int, Double) -> Unit = { _, _, _, _, _ -> },
+    isFavorite: Boolean = false,               // ✅ nuevo
+    onToggleFavorite: () -> Unit = {}          // ✅ nuevo
 ) {
     var showEditSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -59,6 +63,14 @@ fun MedicationCard(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Row {
+                    // ✅ Estrellita favorito
+                    IconButton(onClick = onToggleFavorite) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                            contentDescription = "Favorito",
+                            tint = if (isFavorite) Color(0xFFFFC107) else Color.Gray
+                        )
+                    }
                     IconButton(onClick = { showEditSheet = true }) {
                         Icon(
                             imageVector = Icons.Default.Edit,

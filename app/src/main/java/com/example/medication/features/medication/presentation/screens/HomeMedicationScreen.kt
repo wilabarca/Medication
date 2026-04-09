@@ -8,12 +8,40 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+<<<<<<< Luis_conexion
+=======
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+>>>>>>> main
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+<<<<<<< Luis_conexion
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+=======
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.medication.features.favorites.presentation.viewmodels.FavoritesViewModel
+>>>>>>> main
 import com.example.medication.features.medication.presentation.components.MedicationCard
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -37,6 +65,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.example.medication.features.medication.presentation.viewmodels.HomeViewModel
 
+<<<<<<< Luis_conexion
 
 @Composable
 fun HomeMedicationScreen(
@@ -54,6 +83,60 @@ fun HomeMedicationScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+=======
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeMedicationScreen(
+    onNavigateToRegister: () -> Unit = {},
+    onNavigateToSearch: () -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {},
+    viewModel: HomeViewModel = hiltViewModel(),
+    favoritesViewModel: FavoritesViewModel = hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsState()
+    val favoritesMap by favoritesViewModel.favoritesMap.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.getMedications()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Mis Medicamentos") },
+                actions = {
+                    IconButton(onClick = onNavigateToFavorites) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Favoritos"
+                        )
+                    }
+
+                    IconButton(onClick = onNavigateToSearch) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Buscar medicamentos"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        },
+>>>>>>> main
         floatingActionButton = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -101,6 +184,7 @@ fun HomeMedicationScreen(
                 )
             }
 
+<<<<<<< Luis_conexion
             else -> {
                 LazyColumn(
                     modifier = Modifier
@@ -150,6 +234,39 @@ fun HomeMedicationScreen(
                                     }
                                 )
                             }
+=======
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        items(state.medications) { medication ->
+
+                            LaunchedEffect(medication.id) {
+                                favoritesViewModel.checkIsFavorite(medication.id)
+                            }
+
+                            MedicationCard(
+                                medication = medication,
+                                isFavorite = favoritesMap[medication.id] ?: false,
+                                onToggleFavorite = {
+                                    favoritesViewModel.toggleFavorite(medication)
+                                },
+                                onDelete = { id ->
+                                    viewModel.deleteMedication(id)
+                                },
+                                onUpdate = { id, name, description, quantity, price ->
+                                    viewModel.updateMedication(
+                                        id,
+                                        name,
+                                        description,
+                                        quantity,
+                                        price
+                                    )
+                                }
+                            )
+>>>>>>> main
                         }
                     }
 
