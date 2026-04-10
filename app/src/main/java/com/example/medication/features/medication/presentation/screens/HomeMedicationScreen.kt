@@ -1,9 +1,6 @@
 package com.example.medication.features.medication.presentation.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -11,22 +8,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,6 +17,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.medication.features.favorites.presentation.viewmodels.FavoritesViewModel
+import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.presentation.components.MedicationCard
 import com.example.medication.features.medication.presentation.viewmodels.HomeViewModel
 
@@ -43,7 +27,8 @@ fun HomeMedicationScreen(
     onNavigateToRegister: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
-    onNavigateToAlarm: () -> Unit = {},       // ✅ de la rama Luis_conexion
+    onNavigateToAlarm: () -> Unit = {},
+    onNavigateToEdit: (Medication) -> Unit = {},  // ← nuevo
     viewModel: HomeViewModel = hiltViewModel(),
     favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
@@ -58,9 +43,7 @@ fun HomeMedicationScreen(
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     Scaffold(
@@ -86,16 +69,14 @@ fun HomeMedicationScreen(
                 FloatingActionButton(
                     onClick = onNavigateToAlarm,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp)
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(Icons.Default.Alarm, contentDescription = "Alarma")
                 }
                 FloatingActionButton(
                     onClick = onNavigateToRegister,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp)
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Agregar")
                 }
@@ -104,10 +85,7 @@ fun HomeMedicationScreen(
     ) { padding ->
         when {
             state.isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.padding(padding),
-                    color = MaterialTheme.colorScheme.primary
-                )
+                CircularProgressIndicator(modifier = Modifier.padding(padding))
             }
             state.error != null -> {
                 Text(
@@ -132,9 +110,11 @@ fun HomeMedicationScreen(
                             onToggleFavorite = {
                                 favoritesViewModel.toggleFavorite(medication)
                             },
-                            onDelete = { id -> viewModel.deleteMedication(id) },
-                            onUpdate = { id, name, description, quantity, price ->
-                                viewModel.updateMedication(id, name, description, quantity, price)
+                            onDelete = { id ->
+                                viewModel.deleteMedication(id)
+                            },
+                            onEdit = { med ->
+                                onNavigateToEdit(med)  // ← navega a pantalla dedicada
                             }
                         )
                     }

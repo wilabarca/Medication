@@ -6,7 +6,7 @@ import com.example.medication.core.database.AppDatabase
 import com.example.medication.core.database.dao.FavoriteDao
 import com.example.medication.core.database.dao.MedicationDao
 import com.example.medication.core.database.dao.SearchMedicineDao
-import com.example.medication.features.medication.data.datasources.local.alarm.dao.MedicationAlarmDao
+import com.example.medication.core.database.dao.MedicationAlarmDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

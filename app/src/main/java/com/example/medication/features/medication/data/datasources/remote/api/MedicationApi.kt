@@ -21,7 +21,7 @@ interface MedicationApi {
     @POST("medications")
     suspend fun createMedication(
         @Body body: CreateMedicationRequest
-    )
+    ): MedicationDto  // ← cambiar Unit por MedicationDto
 
     @PUT("medications/{id}")
     suspend fun updateMedication(

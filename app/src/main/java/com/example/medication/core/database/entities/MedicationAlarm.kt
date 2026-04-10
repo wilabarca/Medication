@@ -1,4 +1,4 @@
-package com.example.medication.features.medication.data.datasources.local.alarm.entities
+package com.example.medication.core.database.entities
 
 import androidx.room.Entity
 import androidx.room.Index

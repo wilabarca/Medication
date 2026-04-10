@@ -44,13 +44,6 @@ fun RegisterMedicationScreen(
         }
     }
 
-    LaunchedEffect(state.isSuccess) {
-        if (state.isSuccess) {
-            viewModel.resetState()
-            onMedicationRegistered()
-        }
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -61,10 +54,9 @@ fun RegisterMedicationScreen(
             state.isLoading -> {
                 CircularProgressIndicator()
             }
-
             else -> {
                 RegisterMedicationForm(
-                    onRegister = { name, quantity, price, description ->
+                    onRegister = { name, quantity, price, description, photoPath ->  // ← agregar photoPath
                         val quantityInt = quantity.toIntOrNull()
                         val priceDouble = price.toDoubleOrNull()
 
@@ -78,7 +70,8 @@ fun RegisterMedicationScreen(
                                     name = name,
                                     description = description,
                                     quantity = quantityInt,
-                                    price = priceDouble
+                                    price = priceDouble,
+                                    photoPath = photoPath  // ← agregar
                                 )
                             }
                         }

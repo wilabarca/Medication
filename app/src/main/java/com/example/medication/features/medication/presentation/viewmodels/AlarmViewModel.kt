@@ -2,8 +2,9 @@ package com.example.medication.features.medication.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.medication.features.medication.data.datasources.local.alarm.dao.MedicationAlarmDao
-import com.example.medication.features.medication.data.datasources.local.alarm.entities.MedicationAlarmEntity
+import com.example.medication.core.database.dao.MedicationAlarmDao
+import com.example.medication.core.database.entities.MedicationAlarmEntity
+import com.example.medication.core.hardware.domain.MedicationAlarmScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,8 @@ data class AlarmUiState(
 
 @HiltViewModel
 class AlarmViewModel @Inject constructor(
-    private val dao: MedicationAlarmDao
+    private val dao: MedicationAlarmDao,
+    private val alarmScheduler: MedicationAlarmScheduler
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AlarmUiState())
@@ -62,13 +64,21 @@ class AlarmViewModel @Inject constructor(
                 intervalHours = intervalHours,
                 selectedWeekDays = selectedDays
             )
-            dao.insertAlarm(entity)
+            val alarmId = dao.insertAlarm(entity)
+            alarmScheduler.scheduleAlarm(
+                alarmId = alarmId,
+                medicationName = medicationName,
+                hour = hour,
+                minute = minute,
+                selectedDays = selectedDays
+            )
         }
     }
 
     fun deleteAlarm(id: Long) {
         viewModelScope.launch {
             dao.deleteAlarmById(id)
+            alarmScheduler.cancelAlarm(id)
         }
     }
 

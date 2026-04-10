@@ -2,6 +2,7 @@ package com.example.medication.features.searchmedication.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.medication.core.hardware.domain.VibrateManager
 import com.example.medication.features.searchmedication.domain.entities.Medication
 import com.example.medication.features.searchmedication.domain.usecases.SearchMedicationUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,8 @@ data class SearchMedicinesUiState(
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class SearchMedicinesViewModel @Inject constructor(
-    private val searchMedicationUseCases: SearchMedicationUseCases  // ← wrapper
+    private val searchMedicationUseCases: SearchMedicationUseCases,
+    private val vibrateManager: VibrateManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchMedicinesUiState())
@@ -30,10 +32,8 @@ class SearchMedicinesViewModel @Inject constructor(
     private val queryFlow = MutableStateFlow("")
 
     init {
-        // Sync al iniciar — igual que syncPosts() del profe
         syncMedications()
 
-        // Flow de búsqueda reactivo
         viewModelScope.launch {
             queryFlow
                 .debounce(300L)
@@ -54,7 +54,6 @@ class SearchMedicinesViewModel @Inject constructor(
         }
     }
 
-    // Igual que syncPosts() del profe
     fun syncMedications() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -69,6 +68,7 @@ class SearchMedicinesViewModel @Inject constructor(
     }
 
     fun onMedicineSelected(medication: Medication) {
+        vibrateManager.vibrate(60L)
         _uiState.update { it.copy(selectedMedication = medication) }
     }
 

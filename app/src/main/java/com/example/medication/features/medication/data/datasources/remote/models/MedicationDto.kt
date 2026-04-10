@@ -1,12 +1,12 @@
 package com.example.medication.features.medication.data.datasources.remote.models
 
-import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
 
 data class MedicationDto(
-    val id: String?,
-    val name: String?,
-    val description: String?,
-    val quantity: Int?,
-    val price: Any?
+    @SerializedName("id")          val id: String?,
+    @SerializedName("name")        val name: String?,
+    @SerializedName("description") val description: String?,
+    @SerializedName("quantity")    val quantity: Int?,
+    @SerializedName("price")       val price: Any?,
+    // photoPath no viene de la API — solo se guarda localmente
 )

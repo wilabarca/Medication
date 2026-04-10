@@ -10,13 +10,15 @@ class PostMedicationUseCase @Inject constructor(
         name: String,
         description: String,
         quantity: Int,
-        price: Double
+        price: Double,
+        photoPath: String? = null  // ← agregar
     ) {
         repository.createMedication(
             name = name,
             description = description,
             quantity = quantity,
-            price = price
+            price = price,
+            photoPath = photoPath  // ← agregar
         )
     }
 }

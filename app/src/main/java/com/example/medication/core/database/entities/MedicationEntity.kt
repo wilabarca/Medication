@@ -9,5 +9,6 @@ data class MedicationEntity(
     val name: String,
     val description: String,
     val quantity: Int,
-    val price: Double
+    val price: Double,
+    val photoPath: String? = null  // ← agregar esto
 )
