@@ -9,14 +9,16 @@ interface MedicationRepository {
         name: String,
         description: String,
         quantity: Int,
-        price: Double
+        price: Double,
+        photoPath: String?  // ← sin = null en interfaz
     )
     suspend fun updateMedication(
         id: String,
         name: String,
         description: String,
         quantity: Int,
-        price: Double
+        price: Double,
+        photoPath: String?  // ← sin = null en interfaz
     ): Medication
     suspend fun deleteMedication(id: String)
 }

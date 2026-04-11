@@ -5,4 +5,5 @@ data class CreateMedicationRequest(
     val description: String,
     val quantity: Int,
     val price: Double
+    // photoPath no se envía a la API
 )

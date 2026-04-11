@@ -9,8 +9,8 @@ import com.example.medication.core.database.dao.SearchMedicineDao
 import com.example.medication.core.database.entities.FavoriteEntity
 import com.example.medication.core.database.entities.MedicationEntity
 import com.example.medication.core.database.entities.SearchMedicineEntity
-import com.example.medication.features.medication.data.datasources.local.alarm.dao.MedicationAlarmDao
-import com.example.medication.features.medication.data.datasources.local.alarm.entities.MedicationAlarmEntity
+import com.example.medication.core.database.dao.MedicationAlarmDao
+import com.example.medication.core.database.entities.MedicationAlarmEntity
 import com.example.medication.features.medication.data.datasources.local.converters.AlarmConverters
 
 @Database(

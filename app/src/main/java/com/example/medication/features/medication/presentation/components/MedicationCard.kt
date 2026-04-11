@@ -1,49 +1,34 @@
 package com.example.medication.features.medication.presentation.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import android.net.Uri
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import com.example.medication.features.medication.domain.entities.Medication
-import kotlinx.coroutines.launch
+import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicationCard(
     medication: Medication,
     onDelete: (String) -> Unit = {},
-    onUpdate: (String, String, String, Int, Double) -> Unit = { _, _, _, _, _ -> },
-    isFavorite: Boolean = false,               // ✅ nuevo
-    onToggleFavorite: () -> Unit = {}          // ✅ nuevo
+    onEdit: (Medication) -> Unit = {},  // ← navega a EditMedicationScreen
+    isFavorite: Boolean = false,
+    onToggleFavorite: () -> Unit = {}
 ) {
-    var showEditSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -53,6 +38,22 @@ fun MedicationCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // ← mostrar foto si existe
+            medication.photoPath?.let { path ->
+                val file = File(path)
+                if (file.exists()) {
+                    Image(
+                        painter = rememberAsyncImagePainter(Uri.fromFile(file)),
+                        contentDescription = "Foto de ${medication.name}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -63,7 +64,6 @@ fun MedicationCard(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Row {
-                    // ✅ Estrellita favorito
                     IconButton(onClick = onToggleFavorite) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarOutline,
@@ -71,7 +71,7 @@ fun MedicationCard(
                             tint = if (isFavorite) Color(0xFFFFC107) else Color.Gray
                         )
                     }
-                    IconButton(onClick = { showEditSheet = true }) {
+                    IconButton(onClick = { onEdit(medication) }) {  // ← navega
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Editar",
@@ -94,27 +94,6 @@ fun MedicationCard(
             )
             Text(text = "Cantidad: ${medication.quantity}")
             Text(text = "Precio: $${medication.price}")
-        }
-    }
-
-    if (showEditSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showEditSheet = false },
-            sheetState = sheetState
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                EditMedicationForm(
-                    medication = medication,
-                    onUpdate = { name, quantity, price, description ->
-                        val quantityInt = quantity.toIntOrNull() ?: return@EditMedicationForm
-                        val priceDouble = price.toDoubleOrNull() ?: return@EditMedicationForm
-                        onUpdate(medication.id, name, description, quantityInt, priceDouble)
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            showEditSheet = false
-                        }
-                    }
-                )
-            }
         }
     }
 }

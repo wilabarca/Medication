@@ -31,10 +31,7 @@ class HomeViewModel @Inject constructor(
 
     fun getMedications() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isLoading = true,
-                error = null
-            )
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
                 val medications = getMedicationUseCase()
                 _uiState.value = _uiState.value.copy(
@@ -68,7 +65,8 @@ class HomeViewModel @Inject constructor(
         name: String,
         description: String,
         quantity: Int,
-        price: Double
+        price: Double,
+        photoPath: String? = null  // ← agregar
     ) {
         viewModelScope.launch {
             try {
@@ -77,7 +75,8 @@ class HomeViewModel @Inject constructor(
                     name = name,
                     description = description,
                     quantity = quantity,
-                    price = price
+                    price = price,
+                    photoPath = photoPath  // ← agregar
                 )
                 getMedications()
             } catch (e: Exception) {

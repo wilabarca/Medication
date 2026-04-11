@@ -30,7 +30,8 @@ class EditMedicationViewModel @Inject constructor(
         name: String,
         description: String,
         quantity: Int,
-        price: Double
+        price: Double,
+        photoPath: String? = null  // ← agregar
     ) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
@@ -44,7 +45,8 @@ class EditMedicationViewModel @Inject constructor(
                     name = name,
                     description = description,
                     quantity = quantity,
-                    price = price
+                    price = price,
+                    photoPath = photoPath  // ← agregar
                 )
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
