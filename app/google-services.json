@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "296988696675",
+    "project_id": "medication-2db49",
+    "storage_bucket": "medication-2db49.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:296988696675:android:3fc7262275df1f608c9856",
+        "android_client_info": {
+          "package_name": "com.example.medication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkJXvxpd2WWhQ0BGmuGsE8d0ixxfU8UkY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

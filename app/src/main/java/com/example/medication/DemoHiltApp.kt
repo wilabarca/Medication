@@ -1,9 +1,12 @@
 package com.example.medication
 
 import android.app.Application
+import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.*
+import com.example.medication.core.notifications.MedicationNotificationChannels
 import com.example.medication.core.workers.SyncMedicationsWorker
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -21,6 +24,21 @@ class DemoHiltApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        MedicationNotificationChannels.create(this)
+
+        FirebaseMessaging.getInstance().isAutoInitEnabled = true
+
+        FirebaseMessaging.getInstance()
+            .subscribeToTopic("medications")
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("FCM", "Suscripción al topic medications exitosa")
+                } else {
+                    Log.e("FCM", "Error al suscribirse al topic medications", task.exception)
+                }
+            }
+
         scheduleSyncWorker()
     }
 

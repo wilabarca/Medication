@@ -6,5 +6,5 @@ data class Medication(
     val description: String,
     val quantity: Int,
     val price: Double,
-    val photoPath: String? = null  // ← agregar
+    val photoPath: String? = null
 )
