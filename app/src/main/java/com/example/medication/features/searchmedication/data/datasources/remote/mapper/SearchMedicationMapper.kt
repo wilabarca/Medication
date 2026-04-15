@@ -8,7 +8,7 @@ import com.example.medication.features.searchmedication.domain.entities.Medicati
 fun MedicationDto.toDomain() = Medication(
     id = id,
     name = name,
-    description = description,
+    description = description ?: "",
     quantity = quantity,
     price = price.toDoubleOrNull() ?: 0.0
 )
@@ -17,7 +17,7 @@ fun MedicationDto.toDomain() = Medication(
 fun MedicationDto.toEntity() = SearchMedicineEntity(
     id = id,
     name = name,
-    description = description,
+    description = description ?: "",
     quantity = quantity,
     price = price.toDoubleOrNull() ?: 0.0
 )

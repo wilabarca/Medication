@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class SearchMedicineEntity(
     @PrimaryKey val id: String,
     val name: String,
-    val description: String,
+    val description: String?, // ← nullable
     val quantity: Int,
     val price: Double,
     val cachedAt: Long = System.currentTimeMillis()

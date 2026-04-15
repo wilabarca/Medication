@@ -2,6 +2,7 @@ package com.example.medication.features.auth.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.medication.core.session.JwtSessionManager
 import com.example.medication.features.auth.domain.usescases.LoginUserUseCase
 import com.example.medication.features.auth.domain.usescases.RegisterUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,8 @@ data class AuthUiState(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val loginUserUseCase: LoginUserUseCase,
-    private val registerUserUseCase: RegisterUserUseCase
+    private val registerUserUseCase: RegisterUserUseCase,
+    private val jwtSessionManager: JwtSessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -40,7 +42,9 @@ class AuthViewModel @Inject constructor(
 
             runCatching {
                 loginUserUseCase(email.trim(), password)
-            }.onSuccess {
+            }.onSuccess { token ->
+                jwtSessionManager.saveToken(token)
+
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     loginSuccess = true

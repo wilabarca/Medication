@@ -2,6 +2,7 @@ package com.example.medication.core.session
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
@@ -15,11 +16,14 @@ class JwtSessionManager @Inject constructor(
     private val prefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 
     fun saveToken(token: String) {
+        Log.d("JWT_DEBUG", "saveToken -> $token")
         prefs.edit().putString(KEY_TOKEN, token).apply()
     }
 
     fun getToken(): String? {
-        return prefs.getString(KEY_TOKEN, null)
+        val token = prefs.getString(KEY_TOKEN, null)
+        Log.d("JWT_DEBUG", "getToken -> $token")
+        return token
     }
 
     fun clearToken() {
@@ -31,9 +35,12 @@ class JwtSessionManager @Inject constructor(
 
         return try {
             val parts = token.split(".")
+            Log.d("JWT_DEBUG", "parts size -> ${parts.size}")
+
             if (parts.size < 2) return null
 
             val payload = parts[1]
+            Log.d("JWT_DEBUG", "payload raw -> $payload")
 
             val decodedBytes = Base64.decode(
                 payload,
@@ -41,10 +48,15 @@ class JwtSessionManager @Inject constructor(
             )
 
             val json = String(decodedBytes, StandardCharsets.UTF_8)
-            val jsonObject = JSONObject(json)
+            Log.d("JWT_DEBUG", "payload decoded -> $json")
 
-            if (jsonObject.has("id")) jsonObject.getString("id") else null
+            val jsonObject = JSONObject(json)
+            val userId = if (jsonObject.has("id")) jsonObject.getString("id") else null
+
+            Log.d("JWT_DEBUG", "userId -> $userId")
+            userId
         } catch (e: Exception) {
+            Log.e("JWT_DEBUG", "Error decoding token", e)
             null
         }
     }

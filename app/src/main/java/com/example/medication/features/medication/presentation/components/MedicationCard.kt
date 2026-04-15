@@ -2,24 +2,15 @@ package com.example.medication.features.medication.presentation.components
 
 import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +29,46 @@ fun MedicationCard(
     isFavorite: Boolean = false,
     onToggleFavorite: () -> Unit = {}
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    // Diálogo de confirmación
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = Color.Red
+                )
+            },
+            title = {
+                Text("Eliminar medicamento")
+            },
+            text = {
+                Text("¿Estás seguro de que deseas eliminar \"${medication.name}\"? Esta acción no se puede deshacer.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDelete(medication.id)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red
+                    )
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -89,7 +120,8 @@ fun MedicationCard(
                         )
                     }
 
-                    IconButton(onClick = { onDelete(medication.id) }) {
+                    // ← Ahora abre el diálogo en lugar de eliminar directo
+                    IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Eliminar",
@@ -99,28 +131,15 @@ fun MedicationCard(
                 }
             }
 
-            Text(
-                text = "Dosis: ${medication.dosage}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Text(
-                text = "Presentación: ${medication.form}",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text(text = "Dosis: ${medication.dosage}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Presentación: ${medication.form}", style = MaterialTheme.typography.bodyMedium)
 
             medication.instructions?.takeIf { it.isNotBlank() }?.let {
-                Text(
-                    text = "Indicaciones: $it",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Text(text = "Indicaciones: $it", style = MaterialTheme.typography.bodySmall)
             }
 
             medication.notes?.takeIf { it.isNotBlank() }?.let {
-                Text(
-                    text = "Notas: $it",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Text(text = "Notas: $it", style = MaterialTheme.typography.bodySmall)
             }
 
             Text(text = "Cantidad: ${medication.quantity}")
