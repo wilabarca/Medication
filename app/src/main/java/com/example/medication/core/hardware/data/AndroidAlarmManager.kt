@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.example.medication.core.database.entities.MedicationAlarmEntity
 import com.example.medication.core.hardware.domain.MedicationAlarmScheduler
 import com.example.medication.features.medication.data.alarm.AlarmReceiver
 import java.util.Calendar
@@ -19,100 +20,177 @@ class AndroidAlarmManager @Inject constructor(
     override fun canScheduleExact(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             alarmManager.canScheduleExactAlarms()
-        } else true
+        } else {
+            true
+        }
     }
 
-    override fun scheduleAlarm(
-        alarmId: Long,
-        medicationName: String,
-        hour: Int,
-        minute: Int,
-        selectedDays: List<Int>
-    ) {
-        android.util.Log.d("ALARM_DEBUG", "🔔 Programando: $medicationName a las $hour:$minute")
-        android.util.Log.d("ALARM_DEBUG", "🔔 Días: $selectedDays")
+    override fun scheduleAlarm(alarm: MedicationAlarmEntity) {
+        if (!alarm.isEnabled) return
 
-        if (selectedDays.isEmpty()) {
-            scheduleOneTime(alarmId, medicationName, hour, minute)
-        } else {
-            selectedDays.forEach { day ->
-                scheduleWeekly(alarmId, medicationName, hour, minute, day)
+        when {
+            alarm.selectedWeekDays.isNotEmpty() -> {
+                alarm.selectedWeekDays.distinct().forEach { day ->
+                    scheduleWeeklyNext(alarm, day)
+                }
+            }
+            alarm.intervalHours > 0 -> {
+                scheduleIntervalNext(alarm)
+            }
+            else -> {
+                scheduleOneTime(alarm)
             }
         }
     }
 
-    override fun cancelAlarm(alarmId: Long) {
-        val intent = buildIntent(alarmId, "")
-        alarmManager.cancel(intent)
-        android.util.Log.d("ALARM_DEBUG", "❌ Alarma $alarmId cancelada")
+    override fun cancelAlarm(alarm: MedicationAlarmEntity) {
+        cancelBaseIntent(alarm.id)
+        alarm.selectedWeekDays.distinct().forEach { day ->
+            cancelDayIntent(alarm.id, day)
+        }
     }
 
-    private fun scheduleOneTime(
-        alarmId: Long,
-        medicationName: String,
-        hour: Int,
-        minute: Int
-    ) {
+    private fun scheduleOneTime(alarm: MedicationAlarmEntity) {
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
+            set(Calendar.HOUR_OF_DAY, alarm.startHour)
+            set(Calendar.MINUTE, alarm.startMinute)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
-            if (timeInMillis <= System.currentTimeMillis()) add(Calendar.DAY_OF_YEAR, 1)
+
+            if (timeInMillis <= System.currentTimeMillis()) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
         }
-        android.util.Log.d("ALARM_DEBUG", "🔔 Alarma única para: ${calendar.time}")
-        setExactAlarm(alarmId, calendar.timeInMillis, buildIntent(alarmId, medicationName))
+
+        scheduleExact(
+            requestCode = baseRequestCode(alarm.id),
+            triggerAtMillis = calendar.timeInMillis,
+            alarmId = alarm.id,
+            medicationName = alarm.medicationName
+        )
     }
 
-    private fun scheduleWeekly(
-        alarmId: Long,
-        medicationName: String,
-        hour: Int,
-        minute: Int,
-        dayOfWeek: Int
-    ) {
+    private fun scheduleIntervalNext(alarm: MedicationAlarmEntity) {
+        val intervalMillis = alarm.intervalHours * 60L * 60L * 1000L
+
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_WEEK, dayOfWeek + 1)
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
+            set(Calendar.HOUR_OF_DAY, alarm.startHour)
+            set(Calendar.MINUTE, alarm.startMinute)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
-            if (timeInMillis <= System.currentTimeMillis()) add(Calendar.WEEK_OF_YEAR, 1)
+
+            while (timeInMillis <= System.currentTimeMillis()) {
+                timeInMillis += intervalMillis
+            }
         }
-        val uniqueId = alarmId * 10 + dayOfWeek
-        android.util.Log.d("ALARM_DEBUG", "🔔 Alarma semanal día $dayOfWeek para: ${calendar.time}")
-        setExactAlarm(uniqueId, calendar.timeInMillis, buildIntent(uniqueId, medicationName))
+
+        scheduleExact(
+            requestCode = baseRequestCode(alarm.id),
+            triggerAtMillis = calendar.timeInMillis,
+            alarmId = alarm.id,
+            medicationName = alarm.medicationName
+        )
     }
 
-    private fun setExactAlarm(id: Long, triggerAtMillis: Long, pendingIntent: PendingIntent) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerAtMillis,
-                pendingIntent
-            )
-            android.util.Log.d("ALARM_DEBUG", "✅ Alarma exacta programada id=$id")
-        } else {
+    private fun scheduleWeeklyNext(alarm: MedicationAlarmEntity, dayOfWeekIndex: Int) {
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_WEEK, dayOfWeekIndex + 1)
+            set(Calendar.HOUR_OF_DAY, alarm.startHour)
+            set(Calendar.MINUTE, alarm.startMinute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            if (timeInMillis <= System.currentTimeMillis()) {
+                add(Calendar.WEEK_OF_YEAR, 1)
+            }
+        }
+
+        scheduleExact(
+            requestCode = weeklyRequestCode(alarm.id, dayOfWeekIndex),
+            triggerAtMillis = calendar.timeInMillis,
+            alarmId = alarm.id,
+            medicationName = alarm.medicationName
+        )
+    }
+
+    private fun scheduleExact(
+        requestCode: Int,
+        triggerAtMillis: Long,
+        alarmId: Long,
+        medicationName: String
+    ) {
+        val pendingIntent = buildIntent(
+            requestCode = requestCode,
+            alarmId = alarmId,
+            medicationName = medicationName
+        )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
             alarmManager.setAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 triggerAtMillis,
                 pendingIntent
             )
-            android.util.Log.d("ALARM_DEBUG", "⚠️ Alarma inexacta id=$id")
+            return
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMillis,
+                pendingIntent
+            )
         }
     }
 
-    private fun buildIntent(alarmId: Long, medicationName: String): PendingIntent {
+    private fun cancelBaseIntent(alarmId: Long) {
+        val pendingIntent = buildIntent(
+            requestCode = baseRequestCode(alarmId),
+            alarmId = alarmId,
+            medicationName = ""
+        )
+        alarmManager.cancel(pendingIntent)
+    }
+
+    private fun cancelDayIntent(alarmId: Long, dayOfWeekIndex: Int) {
+        val pendingIntent = buildIntent(
+            requestCode = weeklyRequestCode(alarmId, dayOfWeekIndex),
+            alarmId = alarmId,
+            medicationName = ""
+        )
+        alarmManager.cancel(pendingIntent)
+    }
+
+    private fun buildIntent(
+        requestCode: Int,
+        alarmId: Long,
+        medicationName: String
+    ): PendingIntent {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
-            action = "MEDICATION_ALARM_$alarmId"
+            action = "MEDICATION_ALARM_$requestCode"
             putExtra("alarm_id", alarmId)
             putExtra("medication_name", medicationName)
         }
+
         return PendingIntent.getBroadcast(
             context,
-            (alarmId % Int.MAX_VALUE).toInt(),
+            requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+    }
+
+    private fun baseRequestCode(alarmId: Long): Int {
+        return (alarmId % Int.MAX_VALUE).toInt()
+    }
+
+    private fun weeklyRequestCode(alarmId: Long, dayOfWeekIndex: Int): Int {
+        return ((alarmId * 10) + dayOfWeekIndex).toInt()
     }
 }

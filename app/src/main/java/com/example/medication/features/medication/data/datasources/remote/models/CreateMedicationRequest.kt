@@ -1,9 +1,13 @@
 package com.example.medication.features.medication.data.datasources.remote.models
 
 data class CreateMedicationRequest(
+    val userId: String,
     val name: String,
-    val description: String,
+    val dosage: String,
+    val form: String,
+    val instructions: String? = null,
+    val notes: String? = null,
     val quantity: Int,
-    val price: Double
-    // photoPath no se envía a la API
+    val price: Double? = null,
+    val isActive: Boolean = true
 )

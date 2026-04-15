@@ -5,10 +5,16 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "medications")
 data class MedicationEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey
+    val id: String,
+    val userId: String,
     val name: String,
-    val description: String,
+    val dosage: String,
+    val form: String,
+    val instructions: String? = null,
+    val notes: String? = null,
     val quantity: Int,
-    val price: Double,
-    val photoPath: String? = null  // ← agregar esto
+    val price: Double? = null,
+    val isActive: Boolean = true,
+    val photoPath: String? = null
 )

@@ -2,9 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.google.services)
+    alias(libs.plugins.google.services) // ✅ SOLO este (NO duplicar)
     alias(libs.plugins.hilt)
-
 }
 
 android {
@@ -17,7 +16,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -48,30 +46,33 @@ kotlin {
 }
 
 dependencies {
+
+    // Core Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
 
+    // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
-
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.runtime.saveable)
+    implementation(libs.androidx.material3)
+
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
+
+    // Firebase (BOM)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
-    implementation(libs.androidx.navigation.compose)
 
     // Hilt
     implementation(libs.hilt.android)
-    implementation(libs.androidx.material3)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.compose.foundation.layout)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.compose.runtime.saveable)
     ksp(libs.hilt.compiler)
 
     // Room
@@ -86,11 +87,15 @@ dependencies {
     // OkHttp
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+
+    // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.hilt:hilt-work:1.2.0")
     ksp("androidx.hilt:hilt-compiler:1.2.0")
 
+    // Coil (imágenes)
     implementation("io.coil-kt:coil-compose:2.6.0")
-    implementation("com.google.code.gson:gson:2.10.1")
 
+    // Gson
+    implementation("com.google.code.gson:gson:2.10.1")
 }
