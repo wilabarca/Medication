@@ -19,7 +19,7 @@ object NetWorkModule {
     @ApiMedicationRetrofit
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://192.168.0.19:3000/")  // ✅ EC2
+            .baseUrl("http://44.222.56.219:3000/")  // ✅ EC2
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
