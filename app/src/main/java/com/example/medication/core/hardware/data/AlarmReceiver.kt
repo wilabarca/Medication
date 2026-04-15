@@ -32,19 +32,21 @@ class AlarmReceiver : BroadcastReceiver() {
                 enableVibration(true)
                 vibrationPattern = longArrayOf(0, 500, 200, 500)
             }
+
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
     }
 
     private fun showNotification(context: Context, medicationName: String, alarmId: Long) {
-        val intent = Intent(context, MainActivity::class.java).apply {
+        val openAppIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+
         val pendingIntent = PendingIntent.getActivity(
             context,
             alarmId.toInt(),
-            intent,
+            openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 

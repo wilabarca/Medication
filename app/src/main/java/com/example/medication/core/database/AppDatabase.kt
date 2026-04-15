@@ -20,7 +20,7 @@ import com.example.medication.features.medication.data.datasources.local.convert
         SearchMedicineEntity::class,
         MedicationAlarmEntity::class   // ✅ unificado aquí
     ],
-    version = 4,                       // ✅ incrementar versión
+    version = 5,                       // ✅ incrementar versión
     exportSchema = false
 )
 @TypeConverters(AlarmConverters::class)  // ✅ converter registrado

@@ -1,13 +1,9 @@
 package com.example.medication.core.hardware.domain
 
+import com.example.medication.core.database.entities.MedicationAlarmEntity
+
 interface MedicationAlarmScheduler {
-    fun scheduleAlarm(
-        alarmId: Long,
-        medicationName: String,
-        hour: Int,
-        minute: Int,
-        selectedDays: List<Int>
-    )
-    fun cancelAlarm(alarmId: Long)
+    fun scheduleAlarm(alarm: MedicationAlarmEntity)
+    fun cancelAlarm(alarm: MedicationAlarmEntity)
     fun canScheduleExact(): Boolean
 }

@@ -11,16 +11,25 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MedicationAlarmDao {
 
+    @Query("SELECT * FROM medications_alarms WHERE userId = :userId ORDER BY createdAt DESC")
+    fun getAlarmsByUserId(userId: String): Flow<List<MedicationAlarmEntity>>
+
     @Query("SELECT * FROM medications_alarms ORDER BY createdAt DESC")
-    fun getAllAlarms(): Flow<List<MedicationAlarmEntity>>
+    suspend fun getAllAlarmsNow(): List<MedicationAlarmEntity>
+
+    @Query("SELECT * FROM medications_alarms WHERE userId = :userId ORDER BY createdAt DESC")
+    suspend fun getAlarmsByUserIdNow(userId: String): List<MedicationAlarmEntity>
 
     @Query("SELECT * FROM medications_alarms WHERE id = :alarmId LIMIT 1")
     suspend fun getAlarmById(alarmId: Long): MedicationAlarmEntity?
 
-    @Query("SELECT * FROM medications_alarms WHERE medicationId = :medicationId ORDER BY createdAt DESC")
-    fun getAlarmsByMedicationId(medicationId: String): Flow<List<MedicationAlarmEntity>>
+    @Query("SELECT * FROM medications_alarms WHERE id = :alarmId AND userId = :userId LIMIT 1")
+    suspend fun getAlarmByIdForUser(alarmId: Long, userId: String): MedicationAlarmEntity?
 
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Query("SELECT * FROM medications_alarms WHERE medicationId = :medicationId AND userId = :userId ORDER BY createdAt DESC")
+    fun getAlarmsByMedicationId(userId: String, medicationId: String): Flow<List<MedicationAlarmEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlarm(alarm: MedicationAlarmEntity): Long
 
     @Update
@@ -29,17 +38,22 @@ interface MedicationAlarmDao {
     @Query("DELETE FROM medications_alarms WHERE id = :alarmId")
     suspend fun deleteAlarmById(alarmId: Long)
 
-    @Query("""
+    @Query(
+        """
         UPDATE medications_alarms
         SET isEnabled = :isEnabled,
             updatedAt = :updatedAt
         WHERE id = :alarmId
-    """)
+        """
+    )
     suspend fun updateAlarmStatus(
         alarmId: Long,
         isEnabled: Boolean,
         updatedAt: Long = System.currentTimeMillis()
     )
+
+    @Query("DELETE FROM medications_alarms WHERE userId = :userId")
+    suspend fun deleteAlarmsByUserId(userId: String)
 
     @Query("DELETE FROM medications_alarms")
     suspend fun deleteAllAlarms()
