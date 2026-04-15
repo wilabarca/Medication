@@ -9,19 +9,29 @@ class UpdateMedicationUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         id: String,
+        userId: String,
         name: String,
-        description: String,
+        dosage: String,
+        form: String,
+        instructions: String?,
+        notes: String?,
         quantity: Int,
-        price: Double,
-        photoPath: String? = null  // ← agregar
+        price: Double?,
+        isActive: Boolean = true,
+        photoPath: String? = null
     ): Medication {
         return repository.updateMedication(
             id = id,
+            userId = userId,
             name = name,
-            description = description,
+            dosage = dosage,
+            form = form,
+            instructions = instructions,
+            notes = notes,
             quantity = quantity,
             price = price,
-            photoPath = photoPath  // ← agregar
+            isActive = isActive,
+            photoPath = photoPath
         )
     }
 }

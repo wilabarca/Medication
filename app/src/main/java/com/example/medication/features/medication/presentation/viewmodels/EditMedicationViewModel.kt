@@ -1,8 +1,9 @@
 package com.example.medication.features.medication.presentation.viewmodels
 
+import com.example.medication.features.medication.domain.usecases.UpdateMedicationUseCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.medication.features.medication.domain.usecases.UpdateMedicationUseCase
+import com.example.medication.core.session.JwtSessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +20,8 @@ data class EditMedicationUiState(
 
 @HiltViewModel
 class EditMedicationViewModel @Inject constructor(
-    private val updateMedicationUseCase: UpdateMedicationUseCase
+    private val updateMedicationUseCase: UpdateMedicationUseCase,
+    private val jwtSessionManager: JwtSessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditMedicationUiState())
@@ -28,10 +30,14 @@ class EditMedicationViewModel @Inject constructor(
     fun updateMedication(
         id: String,
         name: String,
-        description: String,
+        dosage: String,
+        form: String,
+        instructions: String?,
+        notes: String?,
         quantity: Int,
-        price: Double,
-        photoPath: String? = null  // ← agregar
+        price: Double?,
+        isActive: Boolean = true,
+        photoPath: String? = null
     ) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
@@ -39,15 +45,33 @@ class EditMedicationViewModel @Inject constructor(
                 isSuccess = false,
                 error = null
             )
+
             try {
+                val currentUserId = jwtSessionManager.getUserId()
+
+                if (currentUserId.isNullOrBlank()) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        isSuccess = false,
+                        error = "No se pudo obtener el usuario actual desde el token"
+                    )
+                    return@launch
+                }
+
                 updateMedicationUseCase(
                     id = id,
+                    userId = currentUserId,
                     name = name,
-                    description = description,
+                    dosage = dosage,
+                    form = form,
+                    instructions = instructions,
+                    notes = notes,
                     quantity = quantity,
                     price = price,
-                    photoPath = photoPath  // ← agregar
+                    isActive = isActive,
+                    photoPath = photoPath
                 )
+
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     isSuccess = true,

@@ -1,10 +1,12 @@
 package com.example.medication.features.medication.data.repositories
 
+import android.util.Log
 import com.example.medication.core.database.dao.MedicationDao
 import com.example.medication.core.database.entities.MedicationEntity
 import com.example.medication.features.medication.data.datasources.remote.api.MedicationApi
 import com.example.medication.features.medication.data.datasources.remote.mapper.toDomain
 import com.example.medication.features.medication.data.datasources.remote.models.CreateMedicationRequest
+import com.example.medication.features.medication.data.datasources.remote.models.MedicationDto
 import com.example.medication.features.medication.data.datasources.remote.models.UpdateMedicationRequest
 import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.domain.repositories.MedicationRepository
@@ -21,17 +23,9 @@ class MedicationRepositoryImpl @Inject constructor(
         remoteMedications.forEach { dto ->
             val id = dto.id ?: return@forEach
             val existing = dao.getById(id)
+
             dao.insertMedication(
-                MedicationEntity(
-                    id = id,
-                    name = dto.name ?: "",
-                    description = dto.description ?: "",
-                    quantity = dto.quantity ?: 0,
-                    price = when (val p = dto.price) {
-                        is Double -> p
-                        is String -> p.toDoubleOrNull() ?: 0.0
-                        else -> 0.0
-                    },
+                dto.toEntity(
                     photoPath = existing?.photoPath
                 )
             )
@@ -39,86 +33,150 @@ class MedicationRepositoryImpl @Inject constructor(
 
         val remoteIds = remoteMedications.mapNotNull { it.id }.toSet()
         val localIds = dao.getAllMedications().map { it.id }.toSet()
+
         localIds.filter { it !in remoteIds }.forEach { id ->
             dao.deleteById(id)
         }
 
         return dao.getAllMedications().map { entity ->
-            Medication(
-                id = entity.id,
-                name = entity.name,
-                description = entity.description,
-                quantity = entity.quantity,
-                price = entity.price,
-                photoPath = entity.photoPath
-            )
+            entity.toDomain()
         }
     }
 
     override suspend fun getMedicationById(id: String): Medication {
         val remote = api.getMedicationById(id).toDomain()
         val local = dao.getById(id)
+
         return remote.copy(photoPath = local?.photoPath)
     }
 
-    // ← createMedication corregido
     override suspend fun createMedication(
+        userId: String,
         name: String,
-        description: String,
+        dosage: String,
+        form: String,
+        instructions: String?,
+        notes: String?,
         quantity: Int,
-        price: Double,
+        price: Double?,
+        isActive: Boolean,
         photoPath: String?
     ) {
-        val request = CreateMedicationRequest(name, description, quantity, price)
-        api.createMedication(request)
+        val request = CreateMedicationRequest(
+            userId = userId,
+            name = name,
+            dosage = dosage,
+            form = form,
+            instructions = instructions,
+            notes = notes,
+            quantity = quantity,
+            price = price,
+            isActive = isActive
+        )
 
-        // La API no devuelve id — buscamos el recién creado por nombre
-        val medications = api.getMedications()
-        val newMedication = medications.lastOrNull { it.name?.trim() == name.trim() }
-        android.util.Log.d("PHOTO_DEBUG", "newMedication encontrado: ${newMedication?.id}")
+        val created = api.createMedication(request).data
 
-        newMedication?.id?.let { id ->
-            dao.insertMedication(
-                MedicationEntity(
-                    id = id,
-                    name = name,
-                    description = description,
-                    quantity = quantity,
-                    price = price,
-                    photoPath = photoPath
-                )
-            )
-            android.util.Log.d("PHOTO_DEBUG", "createMedication insertó photoPath: $photoPath para id: $id")
-        }
+        dao.insertMedication(
+            created.toEntity(photoPath = photoPath)
+        )
+
+        Log.d(
+            "PHOTO_DEBUG",
+            "createMedication insertó photoPath: $photoPath para id: ${created.id}"
+        )
     }
 
     override suspend fun updateMedication(
         id: String,
+        userId: String,
         name: String,
-        description: String,
+        dosage: String,
+        form: String,
+        instructions: String?,
+        notes: String?,
         quantity: Int,
-        price: Double,
+        price: Double?,
+        isActive: Boolean,
         photoPath: String?
     ): Medication {
-        val request = UpdateMedicationRequest(name, description, quantity, price)
-        val remote = api.updateMedication(id, request).toDomain()
+        val request = UpdateMedicationRequest(
+            userId = userId,
+            name = name,
+            dosage = dosage,
+            form = form,
+            instructions = instructions,
+            notes = notes,
+            quantity = quantity,
+            price = price,
+            isActive = isActive
+        )
+
+        val remote = api.updateMedication(id, request).data.toDomain()
+
         dao.insertMedication(
             MedicationEntity(
-                id = id,
-                name = name,
-                description = description,
-                quantity = quantity,
-                price = price,
+                id = remote.id,
+                userId = remote.userId,
+                name = remote.name,
+                dosage = remote.dosage,
+                form = remote.form,
+                instructions = remote.instructions,
+                notes = remote.notes,
+                quantity = remote.quantity,
+                price = remote.price,
+                isActive = remote.isActive,
                 photoPath = photoPath
             )
         )
-        android.util.Log.d("PHOTO_DEBUG", "updateMedication guardó photoPath: $photoPath para id: $id")
+
+        Log.d(
+            "PHOTO_DEBUG",
+            "updateMedication guardó photoPath: $photoPath para id: $id"
+        )
+
         return remote.copy(photoPath = photoPath)
     }
 
     override suspend fun deleteMedication(id: String) {
         api.deleteMedication(id)
         dao.deleteById(id)
-        android.util.Log.d("PHOTO_DEBUG", "deleteMedication borró id: $id de Room")
+        Log.d("PHOTO_DEBUG", "deleteMedication borró id: $id de Room")
+    }
+
+    private fun MedicationDto.toEntity(photoPath: String?): MedicationEntity {
+        return MedicationEntity(
+            id = this.id ?: "",
+            userId = this.userId ?: "",
+            name = this.name ?: "",
+            dosage = this.dosage ?: "",
+            form = this.form ?: "",
+            instructions = this.instructions,
+            notes = this.notes,
+            quantity = this.quantity ?: 0,
+            price = when (val p = this.price) {
+                is Double -> p
+                is String -> p.toDoubleOrNull()
+                is Number -> p.toDouble()
+                else -> null
+            },
+            isActive = this.isActive ?: true,
+            photoPath = photoPath
+        )
+    }
+
+    private fun MedicationEntity.toDomain(): Medication {
+        return Medication(
+            id = this.id,
+            userId = this.userId,
+            name = this.name,
+            dosage = this.dosage,
+            form = this.form,
+            instructions = this.instructions,
+            notes = this.notes,
+            quantity = this.quantity,
+            price = this.price,
+            isActive = this.isActive,
+            photoPath = this.photoPath
+        )
     }
 }

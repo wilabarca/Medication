@@ -2,6 +2,8 @@ package com.example.medication.features.medication.data.datasources.remote.api
 
 import com.example.medication.features.medication.data.datasources.remote.models.CreateMedicationRequest
 import com.example.medication.features.medication.data.datasources.remote.models.MedicationDto
+import com.example.medication.features.medication.data.datasources.remote.models.MedicationResponse
+import com.example.medication.features.medication.data.datasources.remote.models.MessageResponse
 import com.example.medication.features.medication.data.datasources.remote.models.UpdateMedicationRequest
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -21,14 +23,14 @@ interface MedicationApi {
     @POST("medications")
     suspend fun createMedication(
         @Body body: CreateMedicationRequest
-    ): MedicationDto  // ← cambiar Unit por MedicationDto
+    ): MedicationResponse
 
     @PUT("medications/{id}")
     suspend fun updateMedication(
         @Path("id") id: String,
         @Body body: UpdateMedicationRequest
-    ): MedicationDto
+    ): MedicationResponse
 
     @DELETE("medications/{id}")
-    suspend fun deleteMedication(@Path("id") id: String)
+    suspend fun deleteMedication(@Path("id") id: String): MessageResponse
 }
