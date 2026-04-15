@@ -29,4 +29,9 @@ interface AuthApi {
     suspend fun deleteUser(
         @Path("id") id: String
     )
+
+    @POST("devices/register")
+    suspend fun registerDevice(
+        @Body request: RegisterDeviceRequest
+    ): BasicMessageResponse
 }
