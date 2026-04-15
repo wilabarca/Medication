@@ -13,7 +13,7 @@ import com.example.medication.features.medication.presentation.viewmodels.AlarmU
 
 @Composable
 fun AlarmCard(
-    alarm: AlarmUiModel,   // ✅ AlarmUiModel en lugar de AlarmViewModel
+    alarm: AlarmUiModel,   // AlarmUiModel en lugar de AlarmViewModel
     onCalendarClick: (AlarmUiModel) -> Unit = {}
 ) {
     Card(

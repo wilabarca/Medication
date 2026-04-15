@@ -16,7 +16,7 @@ class MedicationRepositoryImpl @Inject constructor(
     private val api: MedicationApiService
 ) : MedicationRepository {
 
-    // Flow reactivo — igual que getPosts() del profe
+    // Flow reactivo
     override fun searchMedicines(query: String): Flow<List<Medication>> {
         return dao.searchByName(query)
             .onStart {
@@ -25,7 +25,7 @@ class MedicationRepositoryImpl @Inject constructor(
             .map { entities -> entities.map { it.toDomain() } }
     }
 
-    // Sync separado — igual que syncPosts() del profe
+
     override suspend fun syncMedications() {
         try {
             val response = api.getAllMedicines()
