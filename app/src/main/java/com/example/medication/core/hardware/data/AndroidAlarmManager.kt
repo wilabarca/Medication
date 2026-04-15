@@ -28,24 +28,23 @@ class AndroidAlarmManager @Inject constructor(
     override fun scheduleAlarm(alarm: MedicationAlarmEntity) {
         if (!alarm.isEnabled) return
 
-        if (alarm.selectedWeekDays.isNotEmpty()) {
-            alarm.selectedWeekDays.distinct().forEach { day ->
-                scheduleWeekly(alarm, day)
+        when {
+            alarm.selectedWeekDays.isNotEmpty() -> {
+                alarm.selectedWeekDays.distinct().forEach { day ->
+                    scheduleWeeklyNext(alarm, day)
+                }
             }
-            return
+            alarm.intervalHours > 0 -> {
+                scheduleIntervalNext(alarm)
+            }
+            else -> {
+                scheduleOneTime(alarm)
+            }
         }
-
-        if (alarm.intervalHours > 0) {
-            scheduleInterval(alarm)
-            return
-        }
-
-        scheduleOneTime(alarm)
     }
 
     override fun cancelAlarm(alarm: MedicationAlarmEntity) {
         cancelBaseIntent(alarm.id)
-
         alarm.selectedWeekDays.distinct().forEach { day ->
             cancelDayIntent(alarm.id, day)
         }
@@ -63,28 +62,15 @@ class AndroidAlarmManager @Inject constructor(
             }
         }
 
-        val pendingIntent = buildIntent(
+        scheduleExact(
             requestCode = baseRequestCode(alarm.id),
+            triggerAtMillis = calendar.timeInMillis,
             alarmId = alarm.id,
             medicationName = alarm.medicationName
         )
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntent
-            )
-        }
     }
 
-    private fun scheduleInterval(alarm: MedicationAlarmEntity) {
+    private fun scheduleIntervalNext(alarm: MedicationAlarmEntity) {
         val intervalMillis = alarm.intervalHours * 60L * 60L * 1000L
 
         val calendar = Calendar.getInstance().apply {
@@ -98,21 +84,15 @@ class AndroidAlarmManager @Inject constructor(
             }
         }
 
-        val pendingIntent = buildIntent(
+        scheduleExact(
             requestCode = baseRequestCode(alarm.id),
+            triggerAtMillis = calendar.timeInMillis,
             alarmId = alarm.id,
             medicationName = alarm.medicationName
         )
-
-        alarmManager.setRepeating(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            intervalMillis,
-            pendingIntent
-        )
     }
 
-    private fun scheduleWeekly(alarm: MedicationAlarmEntity, dayOfWeekIndex: Int) {
+    private fun scheduleWeeklyNext(alarm: MedicationAlarmEntity, dayOfWeekIndex: Int) {
         val calendar = Calendar.getInstance().apply {
             set(Calendar.DAY_OF_WEEK, dayOfWeekIndex + 1)
             set(Calendar.HOUR_OF_DAY, alarm.startHour)
@@ -125,20 +105,48 @@ class AndroidAlarmManager @Inject constructor(
             }
         }
 
-        val requestCode = weeklyRequestCode(alarm.id, dayOfWeekIndex)
-
-        val pendingIntent = buildIntent(
-            requestCode = requestCode,
+        scheduleExact(
+            requestCode = weeklyRequestCode(alarm.id, dayOfWeekIndex),
+            triggerAtMillis = calendar.timeInMillis,
             alarmId = alarm.id,
             medicationName = alarm.medicationName
         )
+    }
 
-        alarmManager.setRepeating(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            AlarmManager.INTERVAL_DAY * 7,
-            pendingIntent
+    private fun scheduleExact(
+        requestCode: Int,
+        triggerAtMillis: Long,
+        alarmId: Long,
+        medicationName: String
+    ) {
+        val pendingIntent = buildIntent(
+            requestCode = requestCode,
+            alarmId = alarmId,
+            medicationName = medicationName
         )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMillis,
+                pendingIntent
+            )
+            return
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMillis,
+                pendingIntent
+            )
+        }
     }
 
     private fun cancelBaseIntent(alarmId: Long) {

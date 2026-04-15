@@ -17,7 +17,7 @@ class AppFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        // Aqui cae el token del backend creo, no se, al chile tengo sueño.
+        // Aqui cae el token del backend no importa si cambia el json en backend no es necesario cambiarlo aqui.
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
