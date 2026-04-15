@@ -19,7 +19,8 @@ import javax.inject.Inject
 data class AlarmUiState(
     val alarms: List<AlarmUiModel> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val alarmSaved: Boolean = false   // ← nuevo
 )
 
 @HiltViewModel
@@ -110,7 +111,12 @@ class AlarmViewModel @Inject constructor(
 
             val alarmId = dao.insertAlarm(entity)
             alarmScheduler.scheduleAlarm(entity.copy(id = alarmId))
+            _uiState.value = _uiState.value.copy(alarmSaved = true)  // ← nuevo
         }
+    }
+
+    fun resetAlarmSaved() {
+        _uiState.value = _uiState.value.copy(alarmSaved = false)
     }
 
     fun updateAlarm(
@@ -227,7 +233,6 @@ class AlarmViewModel @Inject constructor(
                 .joinToString(" ") { index ->
                     listOf("D", "L", "M", "M", "J", "V", "S").getOrElse(index) { "" }
                 }
-
             intervalHours > 0 -> "Cada $intervalHours h"
             else -> "Una vez"
         },

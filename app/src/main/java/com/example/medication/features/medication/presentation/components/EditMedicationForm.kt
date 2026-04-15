@@ -4,15 +4,32 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,25 +44,36 @@ import java.io.File
 @Composable
 fun EditMedicationForm(
     medication: Medication,
-    onUpdate: (String, String, String, String, String?) -> Unit
+    onUpdate: (
+        String,   // name
+        String,   // dosage
+        String,   // form
+        String?,  // instructions
+        String?,  // notes
+        String,   // quantity
+        String,   // price
+        Boolean,  // isActive
+        String?   // photoPath
+    ) -> Unit
 ) {
-    // ← rememberSaveable sobrevive cuando la cámara pausa la actividad
     var name by rememberSaveable { mutableStateOf(medication.name) }
+    var dosage by rememberSaveable { mutableStateOf(medication.dosage) }
+    var form by rememberSaveable { mutableStateOf(medication.form) }
+    var instructions by rememberSaveable { mutableStateOf(medication.instructions ?: "") }
+    var notes by rememberSaveable { mutableStateOf(medication.notes ?: "") }
     var quantity by rememberSaveable { mutableStateOf(medication.quantity.toString()) }
-    var price by rememberSaveable { mutableStateOf(medication.price.toString()) }
-    var description by rememberSaveable { mutableStateOf(medication.description) }
+    var price by rememberSaveable { mutableStateOf(medication.price?.toString() ?: "") }
+    var isActive by rememberSaveable { mutableStateOf(medication.isActive) }
     var photoPath by rememberSaveable { mutableStateOf<String?>(medication.photoPath) }
     var imageFilePath by rememberSaveable { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
 
-    // ← Log para verificar que el photoPath llega correctamente desde Room
     LaunchedEffect(Unit) {
         android.util.Log.d("PHOTO_DEBUG", "photoPath recibido: $photoPath")
         android.util.Log.d("PHOTO_DEBUG", "archivo existe: ${photoPath?.let { File(it).exists() }}")
     }
 
-    // ← photoUri derivado del path guardado en Room
     val photoUri = remember(photoPath) {
         photoPath?.let { path ->
             val file = File(path)
@@ -56,6 +84,7 @@ fun EditMedicationForm(
     fun createImageFile(): File {
         val dir = File(context.filesDir, "medication_photos")
         if (!dir.exists()) dir.mkdirs()
+
         return File(dir, "med_${System.currentTimeMillis()}.jpg").also {
             imageFilePath = it.absolutePath
         }
@@ -65,7 +94,6 @@ fun EditMedicationForm(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            // ← guarda el path que luego Room va a persistir
             imageFilePath?.let { path ->
                 photoPath = path
                 android.util.Log.d("PHOTO_DEBUG", "Nueva foto guardada en: $path")
@@ -106,6 +134,36 @@ fun EditMedicationForm(
         )
 
         OutlinedTextField(
+            value = dosage,
+            onValueChange = { dosage = it },
+            label = { Text("Dosis") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        OutlinedTextField(
+            value = form,
+            onValueChange = { form = it },
+            label = { Text("Presentación") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        OutlinedTextField(
+            value = instructions,
+            onValueChange = { instructions = it },
+            label = { Text("Indicaciones") },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 2
+        )
+
+        OutlinedTextField(
+            value = notes,
+            onValueChange = { notes = it },
+            label = { Text("Notas") },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 2
+        )
+
+        OutlinedTextField(
             value = quantity,
             onValueChange = { quantity = it },
             label = { Text("Cantidad") },
@@ -119,13 +177,16 @@ fun EditMedicationForm(
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
-            value = description,
-            onValueChange = { description = it },
-            label = { Text("Descripción") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3
-        )
+        androidx.compose.foundation.layout.Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Activo")
+            Spacer(modifier = Modifier.weight(1f))
+            Switch(
+                checked = isActive,
+                onCheckedChange = { isActive = it }
+            )
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -141,7 +202,6 @@ fun EditMedicationForm(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // ← muestra foto desde Room si existe
                 if (photoUri != null) {
                     Image(
                         painter = rememberAsyncImagePainter(photoUri),
@@ -166,12 +226,12 @@ fun EditMedicationForm(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
+                    androidx.compose.material3.Icon(
                         imageVector = Icons.Default.Camera,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp)
                     )
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.size(8.dp))
                     Text(if (photoUri == null) "📷 Agregar foto" else "📷 Cambiar foto")
                 }
             }
@@ -179,9 +239,17 @@ fun EditMedicationForm(
 
         Button(
             onClick = {
-                // ← photoPath se pasa al ViewModel que lo guarda en Room
-                android.util.Log.d("PHOTO_DEBUG", "Guardando con photoPath: $photoPath")
-                onUpdate(name, quantity, price, description, photoPath)
+                onUpdate(
+                    name,
+                    dosage,
+                    form,
+                    instructions.ifBlank { null },
+                    notes.ifBlank { null },
+                    quantity,
+                    price,
+                    isActive,
+                    photoPath
+                )
             },
             modifier = Modifier.fillMaxWidth()
         ) {

@@ -2,14 +2,23 @@ package com.example.medication.features.medication.presentation.components
 
 import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +34,7 @@ import java.io.File
 fun MedicationCard(
     medication: Medication,
     onDelete: (String) -> Unit = {},
-    onEdit: (Medication) -> Unit = {},  // ← navega a EditMedicationScreen
+    onEdit: (Medication) -> Unit = {},
     isFavorite: Boolean = false,
     onToggleFavorite: () -> Unit = {}
 ) {
@@ -38,7 +47,6 @@ fun MedicationCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // ← mostrar foto si existe
             medication.photoPath?.let { path ->
                 val file = File(path)
                 if (file.exists()) {
@@ -63,6 +71,7 @@ fun MedicationCard(
                     text = medication.name,
                     style = MaterialTheme.typography.titleMedium
                 )
+
                 Row {
                     IconButton(onClick = onToggleFavorite) {
                         Icon(
@@ -71,13 +80,15 @@ fun MedicationCard(
                             tint = if (isFavorite) Color(0xFFFFC107) else Color.Gray
                         )
                     }
-                    IconButton(onClick = { onEdit(medication) }) {  // ← navega
+
+                    IconButton(onClick = { onEdit(medication) }) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Editar",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
+
                     IconButton(onClick = { onDelete(medication.id) }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -89,11 +100,32 @@ fun MedicationCard(
             }
 
             Text(
-                text = medication.description,
+                text = "Dosis: ${medication.dosage}",
                 style = MaterialTheme.typography.bodyMedium
             )
+
+            Text(
+                text = "Presentación: ${medication.form}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            medication.instructions?.takeIf { it.isNotBlank() }?.let {
+                Text(
+                    text = "Indicaciones: $it",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            medication.notes?.takeIf { it.isNotBlank() }?.let {
+                Text(
+                    text = "Notas: $it",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
             Text(text = "Cantidad: ${medication.quantity}")
-            Text(text = "Precio: $${medication.price}")
+            Text(text = "Precio: ${medication.price ?: 0.0}")
+            Text(text = if (medication.isActive) "Activo" else "Inactivo")
         }
     }
 }

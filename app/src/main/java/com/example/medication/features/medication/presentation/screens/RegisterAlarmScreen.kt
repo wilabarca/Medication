@@ -40,19 +40,24 @@ fun RegisterAlarmScreen(
 
     val days = listOf("D", "L", "M", "M", "J", "V", "S")
     val context = LocalContext.current
+    val state by viewModel.uiState.collectAsState()
 
-    // ← Pedir permiso notificaciones Android 13+
+    // ← Navega solo cuando Room confirma que guardó
+    LaunchedEffect(state.alarmSaved) {
+        if (state.alarmSaved) {
+            viewModel.resetAlarmSaved()
+            onAlarmSaved()
+        }
+    }
+
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { }
 
     LaunchedEffect(Unit) {
-        // Permiso notificaciones
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
-
-        // ← Permiso alarma exacta Android 12+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -160,13 +165,14 @@ fun RegisterAlarmScreen(
             Button(
                 onClick = {
                     viewModel.saveAlarm(
+                        medicationId = "",
                         medicationName = medicationName,
                         hour = startHour.toIntOrNull() ?: 8,
                         minute = startMinute.toIntOrNull() ?: 0,
                         intervalHours = intervalHours.toIntOrNull() ?: 8,
                         selectedDays = selectedDays.toList()
                     )
-                    onAlarmSaved()
+                    // ← ya NO hay onAlarmSaved() aquí
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = medicationName.isNotBlank() && selectedDays.isNotEmpty()
