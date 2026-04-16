@@ -7,7 +7,7 @@ import com.example.medication.features.searchmedication.domain.entities.Medicati
 fun SearchMedicineEntity.toDomain() = Medication(
     id = id,
     name = name,
-    description = description,
+    description = description ?: "",
     quantity = quantity,
     price = price
 )

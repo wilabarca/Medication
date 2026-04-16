@@ -2,20 +2,14 @@ package com.example.medication.features.medication.presentation.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.medication.features.medication.presentation.components.MedicationSuccessDialog
 import com.example.medication.features.medication.presentation.components.RegisterMedicationForm
 import com.example.medication.features.medication.presentation.viewmodels.RegisterMedicationViewModel
 
@@ -27,16 +21,25 @@ fun RegisterMedicationScreen(
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(state.isSuccess) {
-        if (state.isSuccess) {
-            state.successMessage?.let {
-                snackbarHostState.showSnackbar(it)
+    // ── Diálogo de éxito: se muestra solo cuando el ViewModel confirma isSuccess ──
+    if (state.isSuccess) {
+        // Extraemos el nombre del medicamento del mensaje del ViewModel
+        // Formato del mensaje: ✅ Medicamento "Paracetamol" registrado correctamente
+        val medicationName = state.successMessage
+            ?.substringAfter("\"")
+            ?.substringBefore("\"")
+            ?: "Medicamento"
+
+        MedicationSuccessDialog(
+            medicationName = medicationName,
+            onDismiss = {
+                viewModel.resetState()       // limpia isSuccess en el ViewModel
+                onMedicationRegistered()     // navega fuera de la pantalla
             }
-            viewModel.resetState()
-            onMedicationRegistered()
-        }
+        )
     }
 
+    // ── Snackbar para errores ──────────────────────────────────────────────────
     LaunchedEffect(state.error) {
         state.error?.let {
             snackbarHostState.showSnackbar(it)
@@ -44,36 +47,37 @@ fun RegisterMedicationScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         when {
             state.isLoading -> {
-                CircularProgressIndicator()
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
+
             else -> {
                 RegisterMedicationForm(
-                    onRegister = { name, quantity, price, description, photoPath ->  // ← agregar photoPath
+                    onRegister = { name, dosage, form, instructions, notes, quantity, price, isActive, photoPath ->
+                        // Validaciones antes de llamar al ViewModel
                         val quantityInt = quantity.toIntOrNull()
                         val priceDouble = price.toDoubleOrNull()
 
                         when {
-                            name.isBlank() -> return@RegisterMedicationForm
-                            description.isBlank() -> return@RegisterMedicationForm
+                            name.isBlank()      -> return@RegisterMedicationForm
+                            dosage.isBlank()    -> return@RegisterMedicationForm
+                            form.isBlank()      -> return@RegisterMedicationForm
                             quantityInt == null -> return@RegisterMedicationForm
-                            priceDouble == null -> return@RegisterMedicationForm
-                            else -> {
-                                viewModel.registerMedication(
-                                    name = name,
-                                    description = description,
-                                    quantity = quantityInt,
-                                    price = priceDouble,
-                                    photoPath = photoPath  // ← agregar
-                                )
-                            }
+                            else -> viewModel.registerMedication(
+                                name         = name,
+                                dosage       = dosage,
+                                form         = form,
+                                instructions = instructions,
+                                notes        = notes,
+                                quantity     = quantityInt,
+                                price        = priceDouble,
+                                isActive     = isActive,
+                                photoPath    = photoPath
+                            )
                         }
                     }
                 )
@@ -82,7 +86,7 @@ fun RegisterMedicationScreen(
 
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier  = Modifier.align(Alignment.BottomCenter)
         )
     }
 }
