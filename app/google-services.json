@@ -1,23 +1,13 @@
 {
   "project_info": {
-<<<<<<< Updated upstream
     "project_number": "296988696675",
     "project_id": "medication-2db49",
     "storage_bucket": "medication-2db49.firebasestorage.app"
-=======
-    "project_number": "954731782252",
-    "project_id": "notification-medication",
-    "storage_bucket": "notification-medication.firebasestorage.app"
->>>>>>> Stashed changes
   },
   "client": [
     {
       "client_info": {
-<<<<<<< Updated upstream
         "mobilesdk_app_id": "1:296988696675:android:3fc7262275df1f608c9856",
-=======
-        "mobilesdk_app_id": "1:954731782252:android:733eb6240e9f3469f77849",
->>>>>>> Stashed changes
         "android_client_info": {
           "package_name": "com.example.medication"
         }
@@ -25,11 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-<<<<<<< Updated upstream
           "current_key": "AIzaSyDkJXvxpd2WWhQ0BGmuGsE8d0ixxfU8UkY"
-=======
-          "current_key": "AIzaSyDSU794kwmGeE37sQxA_iH7VvaISj8VrDE"
->>>>>>> Stashed changes
         }
       ],
       "services": {

@@ -18,7 +18,8 @@ interface MedicationRepository {
         quantity: Int,
         price: Double?,
         isActive: Boolean,
-        photoPath: String?
+        photoPath: String?,
+        deviceId: String
     )
 
     suspend fun updateMedication(
@@ -32,7 +33,8 @@ interface MedicationRepository {
         quantity: Int,
         price: Double?,
         isActive: Boolean,
-        photoPath: String?
+        photoPath: String?,
+        deviceId: String
     ): Medication
 
     suspend fun deleteMedication(id: String)

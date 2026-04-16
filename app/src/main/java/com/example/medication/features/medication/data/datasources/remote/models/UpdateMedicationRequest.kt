@@ -9,5 +9,6 @@ data class UpdateMedicationRequest(
     val notes: String? = null,
     val quantity: Int,
     val price: Double? = null,
-    val isActive: Boolean = true
+    val isActive: Boolean = true,
+    val deviceId: String
 )

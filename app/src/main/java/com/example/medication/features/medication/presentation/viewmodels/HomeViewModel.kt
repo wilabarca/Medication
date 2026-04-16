@@ -2,6 +2,7 @@ package com.example.medication.features.medication.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.medication.core.hardware.domain.DeviceIdProvider
 import com.example.medication.core.session.JwtSessionManager
 import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.domain.usecases.DeleteMedicationUseCase
@@ -25,7 +26,8 @@ class HomeViewModel @Inject constructor(
     private val getMedicationUseCase: GetMedicationUseCase,
     private val deleteMedicationUseCase: DeleteMedicationUseCase,
     private val updateMedicationUseCase: UpdateMedicationUseCase,
-    private val jwtSessionManager: JwtSessionManager
+    private val jwtSessionManager: JwtSessionManager,
+    private val deviceIdProvider: DeviceIdProvider
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeMedicationUiState())
@@ -99,6 +101,8 @@ class HomeViewModel @Inject constructor(
                     return@launch
                 }
 
+                val deviceId = deviceIdProvider.getDeviceId()
+
                 updateMedicationUseCase(
                     id = id,
                     userId = currentUserId,
@@ -110,7 +114,8 @@ class HomeViewModel @Inject constructor(
                     quantity = quantity,
                     price = price,
                     isActive = isActive,
-                    photoPath = photoPath
+                    photoPath = photoPath,
+                    deviceId = deviceId
                 )
 
                 getMedications()

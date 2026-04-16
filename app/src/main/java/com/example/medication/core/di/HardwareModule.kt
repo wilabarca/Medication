@@ -3,9 +3,11 @@ package com.example.medication.core.di
 import android.content.Context
 import com.example.medication.core.hardware.data.AndroidAlarmManager
 import com.example.medication.core.hardware.data.AndroidCameraManager
+import com.example.medication.core.hardware.data.AndroidDeviceIdProvider
 import com.example.medication.core.hardware.data.AndroidVibrateManager
-import com.example.medication.core.hardware.domain.MedicationAlarmScheduler
 import com.example.medication.core.hardware.domain.CameraManager
+import com.example.medication.core.hardware.domain.DeviceIdProvider
+import com.example.medication.core.hardware.domain.MedicationAlarmScheduler
 import com.example.medication.core.hardware.domain.VibrateManager
 import dagger.Module
 import dagger.Provides
@@ -35,4 +37,10 @@ object HardwareModule {
     fun provideMedicationAlarmScheduler(
         @ApplicationContext context: Context
     ): MedicationAlarmScheduler = AndroidAlarmManager(context)
+
+    @Provides
+    @Singleton
+    fun provideDeviceIdProvider(
+        @ApplicationContext context: Context
+    ): DeviceIdProvider = AndroidDeviceIdProvider(context)
 }

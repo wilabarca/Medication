@@ -60,7 +60,8 @@ class MedicationRepositoryImpl @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean,
-        photoPath: String?
+        photoPath: String?,
+        deviceId: String
     ) {
         val request = CreateMedicationRequest(
             userId = userId,
@@ -71,7 +72,8 @@ class MedicationRepositoryImpl @Inject constructor(
             notes = notes,
             quantity = quantity,
             price = price,
-            isActive = isActive
+            isActive = isActive,
+            deviceId = deviceId
         )
 
         val created = api.createMedication(request).data
@@ -97,7 +99,8 @@ class MedicationRepositoryImpl @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean,
-        photoPath: String?
+        photoPath: String?,
+        deviceId: String
     ): Medication {
         val request = UpdateMedicationRequest(
             userId = userId,
@@ -108,7 +111,8 @@ class MedicationRepositoryImpl @Inject constructor(
             notes = notes,
             quantity = quantity,
             price = price,
-            isActive = isActive
+            isActive = isActive,
+            deviceId = deviceId
         )
 
         val remote = api.updateMedication(id, request).data.toDomain()

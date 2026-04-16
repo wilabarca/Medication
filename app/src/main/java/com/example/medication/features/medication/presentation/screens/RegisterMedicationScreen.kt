@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -54,24 +53,29 @@ fun RegisterMedicationScreen(
             state.isLoading -> {
                 CircularProgressIndicator()
             }
+
             else -> {
                 RegisterMedicationForm(
-                    onRegister = { name, quantity, price, description, photoPath ->  // ← agregar photoPath
+                    onRegister = { name, dosage, form, instructions, notes, quantity, price, isActive, photoPath ->
                         val quantityInt = quantity.toIntOrNull()
                         val priceDouble = price.toDoubleOrNull()
 
                         when {
                             name.isBlank() -> return@RegisterMedicationForm
-                            description.isBlank() -> return@RegisterMedicationForm
+                            dosage.isBlank() -> return@RegisterMedicationForm
+                            form.isBlank() -> return@RegisterMedicationForm
                             quantityInt == null -> return@RegisterMedicationForm
-                            priceDouble == null -> return@RegisterMedicationForm
                             else -> {
                                 viewModel.registerMedication(
                                     name = name,
-                                    description = description,
+                                    dosage = dosage,
+                                    form = form,
+                                    instructions = instructions,
+                                    notes = notes,
                                     quantity = quantityInt,
                                     price = priceDouble,
-                                    photoPath = photoPath  // ← agregar
+                                    isActive = isActive,
+                                    photoPath = photoPath
                                 )
                             }
                         }

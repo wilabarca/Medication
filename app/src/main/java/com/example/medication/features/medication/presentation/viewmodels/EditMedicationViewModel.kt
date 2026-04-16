@@ -1,9 +1,10 @@
 package com.example.medication.features.medication.presentation.viewmodels
 
-import com.example.medication.features.medication.domain.usecases.UpdateMedicationUseCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.medication.core.hardware.domain.DeviceIdProvider
 import com.example.medication.core.session.JwtSessionManager
+import com.example.medication.features.medication.domain.usecases.UpdateMedicationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,8 @@ data class EditMedicationUiState(
 @HiltViewModel
 class EditMedicationViewModel @Inject constructor(
     private val updateMedicationUseCase: UpdateMedicationUseCase,
-    private val jwtSessionManager: JwtSessionManager
+    private val jwtSessionManager: JwtSessionManager,
+    private val deviceIdProvider: DeviceIdProvider
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditMedicationUiState())
@@ -58,6 +60,8 @@ class EditMedicationViewModel @Inject constructor(
                     return@launch
                 }
 
+                val deviceId = deviceIdProvider.getDeviceId()
+
                 updateMedicationUseCase(
                     id = id,
                     userId = currentUserId,
@@ -69,7 +73,8 @@ class EditMedicationViewModel @Inject constructor(
                     quantity = quantity,
                     price = price,
                     isActive = isActive,
-                    photoPath = photoPath
+                    photoPath = photoPath,
+                    deviceId = deviceId
                 )
 
                 _uiState.value = _uiState.value.copy(

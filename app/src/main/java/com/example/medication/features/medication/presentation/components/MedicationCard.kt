@@ -10,7 +10,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,10 +25,50 @@ import java.io.File
 fun MedicationCard(
     medication: Medication,
     onDelete: (String) -> Unit = {},
-    onEdit: (Medication) -> Unit = {},  // ← navega a EditMedicationScreen
+    onEdit: (Medication) -> Unit = {},
     isFavorite: Boolean = false,
     onToggleFavorite: () -> Unit = {}
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    // Diálogo de confirmación
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = Color.Red
+                )
+            },
+            title = {
+                Text("Eliminar medicamento")
+            },
+            text = {
+                Text("¿Estás seguro de que deseas eliminar \"${medication.name}\"? Esta acción no se puede deshacer.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDelete(medication.id)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red
+                    )
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -38,7 +78,6 @@ fun MedicationCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // ← mostrar foto si existe
             medication.photoPath?.let { path ->
                 val file = File(path)
                 if (file.exists()) {
@@ -63,6 +102,7 @@ fun MedicationCard(
                     text = medication.name,
                     style = MaterialTheme.typography.titleMedium
                 )
+
                 Row {
                     IconButton(onClick = onToggleFavorite) {
                         Icon(
@@ -71,14 +111,17 @@ fun MedicationCard(
                             tint = if (isFavorite) Color(0xFFFFC107) else Color.Gray
                         )
                     }
-                    IconButton(onClick = { onEdit(medication) }) {  // ← navega
+
+                    IconButton(onClick = { onEdit(medication) }) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Editar",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                    IconButton(onClick = { onDelete(medication.id) }) {
+
+                    // ← Ahora abre el diálogo en lugar de eliminar directo
+                    IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Eliminar",
@@ -88,12 +131,20 @@ fun MedicationCard(
                 }
             }
 
-            Text(
-                text = medication.description,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text(text = "Dosis: ${medication.dosage}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Presentación: ${medication.form}", style = MaterialTheme.typography.bodyMedium)
+
+            medication.instructions?.takeIf { it.isNotBlank() }?.let {
+                Text(text = "Indicaciones: $it", style = MaterialTheme.typography.bodySmall)
+            }
+
+            medication.notes?.takeIf { it.isNotBlank() }?.let {
+                Text(text = "Notas: $it", style = MaterialTheme.typography.bodySmall)
+            }
+
             Text(text = "Cantidad: ${medication.quantity}")
-            Text(text = "Precio: $${medication.price}")
+            Text(text = "Precio: ${medication.price ?: 0.0}")
+            Text(text = if (medication.isActive) "Activo" else "Inactivo")
         }
     }
 }

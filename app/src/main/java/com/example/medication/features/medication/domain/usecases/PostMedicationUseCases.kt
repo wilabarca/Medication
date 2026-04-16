@@ -16,7 +16,8 @@ class PostMedicationUseCase @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean = true,
-        photoPath: String? = null
+        photoPath: String? = null,
+        deviceId: String
     ) {
         repository.createMedication(
             userId = userId,
@@ -28,7 +29,8 @@ class PostMedicationUseCase @Inject constructor(
             quantity = quantity,
             price = price,
             isActive = isActive,
-            photoPath = photoPath
+            photoPath = photoPath,
+            deviceId = deviceId
         )
     }
 }

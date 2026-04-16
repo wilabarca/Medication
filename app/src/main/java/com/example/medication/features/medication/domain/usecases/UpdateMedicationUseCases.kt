@@ -18,7 +18,8 @@ class UpdateMedicationUseCase @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean = true,
-        photoPath: String? = null
+        photoPath: String? = null,
+        deviceId: String
     ): Medication {
         return repository.updateMedication(
             id = id,
@@ -31,7 +32,8 @@ class UpdateMedicationUseCase @Inject constructor(
             quantity = quantity,
             price = price,
             isActive = isActive,
-            photoPath = photoPath
+            photoPath = photoPath,
+            deviceId = deviceId
         )
     }
 }
