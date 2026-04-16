@@ -1,13 +1,12 @@
 package com.example.medication.features.medication.presentation.components
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material3.*
@@ -24,32 +23,18 @@ import java.io.File
 
 @Composable
 fun RegisterMedicationForm(
-    onRegister: (
-        name: String,
-        dosage: String,
-        form: String,
-        instructions: String?,
-        notes: String?,
-        quantity: String,
-        price: String,
-        isActive: Boolean,
-        photoPath: String?
-    ) -> Unit
+    onRegister: (name: String, quantity: String, price: String, description: String, photoPath: String?) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var dosage by remember { mutableStateOf("") }
-    var form by remember { mutableStateOf("") }
-    var instructions by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
-    var isActive by remember { mutableStateOf(true) }
+    var description by remember { mutableStateOf("") }
     var photoPath by remember { mutableStateOf<String?>(null) }
     var photoUri by remember { mutableStateOf<Uri?>(null) }
 
     val context = LocalContext.current
-    val scrollState = rememberScrollState()
 
+    // Crear archivo temporal para la foto
     fun createImageFile(): File {
         val dir = File(context.filesDir, "medication_photos")
         if (!dir.exists()) dir.mkdirs()
@@ -81,57 +66,24 @@ fun RegisterMedicationForm(
         }
     }
 
-    // ✅ Scroll agregado aquí - el Column principal ahora es desplazable
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Registrar Medicamento", style = MaterialTheme.typography.titleLarge)
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+
+        Text(
+            text = "Registrar Medicamento",
+            style = MaterialTheme.typography.titleLarge
+        )
 
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Nombre *") },
+            label = { Text("Nombre") },
             modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = dosage,
-            onValueChange = { dosage = it },
-            label = { Text("Dosis *") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = form,
-            onValueChange = { form = it },
-            label = { Text("Presentación * (ej: tableta, jarabe)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = instructions,
-            onValueChange = { instructions = it },
-            label = { Text("Indicaciones") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 2
-        )
-
-        OutlinedTextField(
-            value = notes,
-            onValueChange = { notes = it },
-            label = { Text("Notas") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 2
         )
 
         OutlinedTextField(
             value = quantity,
             onValueChange = { quantity = it },
-            label = { Text("Cantidad *") },
+            label = { Text("Cantidad") },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -142,15 +94,15 @@ fun RegisterMedicationForm(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("Descripción") },
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Medicamento activo", style = MaterialTheme.typography.bodyMedium)
-            Switch(checked = isActive, onCheckedChange = { isActive = it })
-        }
+            minLines = 3
+        )
 
+        // ← Sección de foto
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
@@ -165,6 +117,7 @@ fun RegisterMedicationForm(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Muestra la foto si ya tomó una
                 if (photoUri != null) {
                     Image(
                         painter = rememberAsyncImagePainter(photoUri),
@@ -176,11 +129,18 @@ fun RegisterMedicationForm(
                         contentScale = ContentScale.Crop
                     )
                 }
+
                 Button(
-                    onClick = { permissionLauncher.launch(android.Manifest.permission.CAMERA) },
+                    onClick = {
+                        permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(Icons.Default.Camera, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Icon(
+                        imageVector = Icons.Default.Camera,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
                     Spacer(Modifier.width(8.dp))
                     Text(if (photoUri == null) "📷 Tomar foto" else "📷 Cambiar foto")
                 }
@@ -188,19 +148,7 @@ fun RegisterMedicationForm(
         }
 
         Button(
-            onClick = {
-                onRegister(
-                    name,
-                    dosage,
-                    form,
-                    instructions.ifBlank { null },
-                    notes.ifBlank { null },
-                    quantity,
-                    price,
-                    isActive,
-                    photoPath
-                )
-            },
+            onClick = { onRegister(name, quantity, price, description, photoPath) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Guardar Medicamento")
