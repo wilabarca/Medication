@@ -23,7 +23,7 @@ interface AuthApi {
     suspend fun updateUser(
         @Path("id") id: String,
         @Body request: UpdateUserRequest
-    ): LoginResponse
+    ): UserDto
 
     @DELETE("users/{id}")
     suspend fun deleteUser(

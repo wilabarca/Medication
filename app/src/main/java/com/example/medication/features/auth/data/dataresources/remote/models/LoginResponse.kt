@@ -1,5 +1,6 @@
 package com.example.medication.features.auth.data.dataresources.remote.models
 
 data class LoginResponse(
-   val token: String
+   val token: String,
+   val user: UserDto
 )

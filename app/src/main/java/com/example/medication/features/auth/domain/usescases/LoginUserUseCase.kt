@@ -1,6 +1,7 @@
 package com.example.medication.features.auth.domain.usescases
 
 
+import com.example.medication.features.auth.domain.entities.LoginResult
 import com.example.medication.features.auth.domain.repositories.UserRepository
 import javax.inject.Inject
 
@@ -11,7 +12,7 @@ class LoginUserUseCase @Inject constructor(
     suspend operator fun invoke(
         email: String,
         password: String
-    ): String{
+    ): LoginResult {
         return repository.login(email, password)
     }
 }
