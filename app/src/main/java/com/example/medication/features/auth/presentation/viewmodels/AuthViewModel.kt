@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.medication.core.session.JwtSessionManager
 import com.example.medication.features.auth.data.dataresources.remote.api.AuthApi
 import com.example.medication.features.auth.data.dataresources.remote.models.RegisterDeviceRequest
+import com.example.medication.features.auth.domain.entities.User
 import com.example.medication.features.auth.domain.usescases.LoginUserUseCase
 import com.example.medication.features.auth.domain.usescases.RegisterUserUseCase
 import com.google.firebase.messaging.FirebaseMessaging
@@ -23,7 +24,8 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val loginSuccess: Boolean = false,
-    val registerSuccess: Boolean = false
+    val registerSuccess: Boolean = false,
+    val loggedUser: User? = null
 )
 
 @HiltViewModel
@@ -47,18 +49,22 @@ class AuthViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _uiState.value = AuthUiState(isLoading = true)
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null
+            )
 
             runCatching {
                 loginUserUseCase(email.trim(), password)
-            }.onSuccess { token ->
-                jwtSessionManager.saveToken(token)
+            }.onSuccess { result ->
+                jwtSessionManager.saveToken(result.token)
 
                 registerCurrentDeviceAfterLogin()
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    loginSuccess = true
+                    loginSuccess = true,
+                    loggedUser = result.user
                 )
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
@@ -116,7 +122,8 @@ class AuthViewModel @Inject constructor(
         name: String,
         email: String,
         password: String,
-        repeatPassword: String
+        repeatPassword: String,
+        role: String
     ) {
         when {
             name.isBlank() || email.isBlank() || password.isBlank() || repeatPassword.isBlank() -> {
@@ -132,13 +139,35 @@ class AuthViewModel @Inject constructor(
                 )
                 return
             }
+
+            role.isBlank() -> {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Selecciona un rol"
+                )
+                return
+            }
+
+            role != "caregiver" && role != "patient" -> {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Rol inválido"
+                )
+                return
+            }
         }
 
         viewModelScope.launch {
-            _uiState.value = AuthUiState(isLoading = true)
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null
+            )
 
             runCatching {
-                registerUserUseCase(name.trim(), email.trim(), password)
+                registerUserUseCase(
+                    name = name.trim(),
+                    email = email.trim(),
+                    password = password,
+                    role = role
+                )
             }.onSuccess {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -163,5 +192,9 @@ class AuthViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
+    }
+
+    fun clearLoggedUser() {
+        _uiState.value = _uiState.value.copy(loggedUser = null)
     }
 }

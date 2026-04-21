@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 private val MedBlue = Color(0xFF0077B6)
 private val MedBlueDark = Color(0xFF003F5C)
 private val MedTeal = Color(0xFF00B4D8)
+private val Purple = Color(0xFF7B2CBF) // Añadido porque se usa en los íconos
 private val TextColor = Color(0xFF023E58)
 private val InputBackground = Color.White
 private val InputBorderIdle = Color(0xFFB0D4E3)
@@ -44,12 +45,14 @@ fun RegisterForm(
     correo: String,
     contrasena: String,
     repetirContrasena: String,
+    selectedRole: String,
     isLoading: Boolean,
     errorMessage: String?,
     onUsuarioChange: (String) -> Unit,
     onCorreoChange: (String) -> Unit,
     onContrasenaChange: (String) -> Unit,
     onRepetirContrasenaChange: (String) -> Unit,
+    onRoleChange: (String) -> Unit,
     onCrearUsuario: () -> Unit
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
@@ -95,8 +98,11 @@ fun RegisterForm(
                 singleLine = true,
                 label = { Text("Nombre completo", color = Color.Gray) },
                 leadingIcon = {
-                    Icon(Icons.Filled.Person, contentDescription = null,
-                        tint = if (hasError) Color.Red else MedBlue)
+                    Icon(
+                        imageVector = Icons.Filled.Person,
+                        contentDescription = "Nombre",
+                        tint = Purple
+                    )
                 },
                 isError = hasError,
                 shape = RoundedCornerShape(12.dp),
@@ -113,8 +119,11 @@ fun RegisterForm(
                 singleLine = true,
                 label = { Text("Correo electrónico", color = Color.Gray) },
                 leadingIcon = {
-                    Icon(Icons.Filled.Email, contentDescription = null,
-                        tint = if (hasError) Color.Red else MedBlue)
+                    Icon(
+                        imageVector = Icons.Filled.Email,
+                        contentDescription = "Correo electrónico",
+                        tint = if (hasError) Color.Red else MedBlue
+                    )
                 },
                 isError = hasError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -132,19 +141,25 @@ fun RegisterForm(
                 singleLine = true,
                 label = { Text("Contraseña", color = Color.Gray) },
                 leadingIcon = {
-                    Icon(Icons.Filled.Lock, contentDescription = null,
-                        tint = if (hasError) Color.Red else MedBlue)
+                    Icon(
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = "Contraseña",
+                        tint = Purple
+                    )
                 },
                 trailingIcon = {
                     Icon(
                         imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                        contentDescription = null,
+                        contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
                         tint = Color.Gray,
                         modifier = Modifier.clickable { passwordVisible = !passwordVisible }
                     )
                 },
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                isError = hasError,
+                visualTransformation = if (passwordVisible) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 shape = RoundedCornerShape(12.dp),
                 colors = medFieldColors(hasError)
@@ -160,25 +175,40 @@ fun RegisterForm(
                 singleLine = true,
                 label = { Text("Repetir contraseña", color = Color.Gray) },
                 leadingIcon = {
-                    Icon(Icons.Filled.Lock, contentDescription = null,
-                        tint = if (hasError) Color.Red else MedBlue)
+                    Icon(
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = "Repetir contraseña",
+                        tint = Purple
+                    )
                 },
                 trailingIcon = {
                     Icon(
                         imageVector = if (repeatPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                        contentDescription = null,
+                        contentDescription = if (repeatPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña",
                         tint = Color.Gray,
                         modifier = Modifier.clickable { repeatPasswordVisible = !repeatPasswordVisible }
                     )
                 },
-                visualTransformation = if (repeatPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (repeatPasswordVisible) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
                 isError = hasError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 shape = RoundedCornerShape(12.dp),
                 colors = medFieldColors(hasError)
             )
 
-            // Alerta de error animada
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Selector de rol (de la rama Luis_conexion)
+            RoleSelector(
+                selectedRole = selectedRole,
+                onRoleChange = onRoleChange
+            )
+
+            // Alerta de error animada (de la rama main)
             AnimatedVisibility(
                 visible = hasError,
                 enter = fadeIn() + expandVertically(),
@@ -239,6 +269,37 @@ fun RegisterForm(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RoleSelector(
+    selectedRole: String,
+    onRoleChange: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Button(
+            onClick = { onRoleChange("caregiver") },
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (selectedRole == "caregiver") Purple else Color.Gray
+            )
+        ) {
+            Text("Cuidador", color = Color.White)
+        }
+
+        Button(
+            onClick = { onRoleChange("patient") },
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (selectedRole == "patient") Purple else Color.Gray
+            )
+        ) {
+            Text("Paciente", color = Color.White)
         }
     }
 }

@@ -5,9 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -15,24 +14,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.medication.features.auth.presentation.components.LoginForm
 import com.example.medication.features.auth.presentation.viewmodels.AuthViewModel
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
+    onCaregiverLoginSuccess: () -> Unit,
+    onPatientLoginSuccess: () -> Unit,
     onRegistrar: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     var usuario by rememberSaveable { mutableStateOf("") }
     var contrasena by rememberSaveable { mutableStateOf("") }
 
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(uiState.loginSuccess) {
-        if (uiState.loginSuccess) {
+    LaunchedEffect(uiState.loginSuccess, uiState.loggedUser) {
+        val loggedUser = uiState.loggedUser
+
+        if (uiState.loginSuccess && loggedUser != null) {
+            val role = loggedUser.role
+
             viewModel.consumeLoginSuccess()
-            onLoginSuccess()
+            viewModel.clearLoggedUser()
+
+            when (role) {
+                "caregiver" -> onCaregiverLoginSuccess()
+                "patient" -> onPatientLoginSuccess()
+            }
         }
     }
 

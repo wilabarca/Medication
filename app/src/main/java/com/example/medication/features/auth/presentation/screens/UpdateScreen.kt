@@ -1,6 +1,5 @@
 package com.example.medication.features.auth.presentation.screens
 
-import android.window.SplashScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,12 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.medication.features.auth.presentation.components.UpdateForm
 
-
 @Composable
 fun UpdateScreen(
     initialUsuario: String = "",
     initialCorreo: String = "",
-    onGuardarCambios: (String, String, String, String) -> Unit = { _, _, _, _ -> },
+    initialRole: String = "caregiver",
+    onGuardarCambios: (String, String, String, String, String) -> Unit = { _, _, _, _, _ -> },
     onSeleccionarImagen: () -> Unit = {},
     onCancelar: () -> Unit = {}
 ) {
@@ -27,6 +26,7 @@ fun UpdateScreen(
     var correo by rememberSaveable { mutableStateOf(initialCorreo) }
     var contrasena by rememberSaveable { mutableStateOf("") }
     var repetirContrasena by rememberSaveable { mutableStateOf("") }
+    var role by rememberSaveable { mutableStateOf(initialRole) }
 
     Box(
         modifier = Modifier
@@ -39,18 +39,21 @@ fun UpdateScreen(
             correo = correo,
             contrasena = contrasena,
             repetirContrasena = repetirContrasena,
+            selectedRole = role,
             isLoading = false,
             errorMessage = null,
             onUsuarioChange = { usuario = it },
             onCorreoChange = { correo = it },
             onContrasenaChange = { contrasena = it },
             onRepetirContrasenaChange = { repetirContrasena = it },
+            onRoleChange = { role = it },
             onGuardarCambios = {
                 onGuardarCambios(
                     usuario,
                     correo,
                     contrasena,
-                    repetirContrasena
+                    repetirContrasena,
+                    role
                 )
             },
             onSeleccionarImagen = onSeleccionarImagen,
