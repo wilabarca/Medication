@@ -1,5 +1,6 @@
 package com.example.medication.features.medication.presentation.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +12,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -28,7 +31,7 @@ fun HomeMedicationScreen(
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToAlarm: () -> Unit = {},
-    onNavigateToEdit: (Medication) -> Unit = {},  // ← nuevo
+    onNavigateToEdit: (Medication) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
     favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
@@ -83,40 +86,53 @@ fun HomeMedicationScreen(
             }
         }
     ) { padding ->
-        when {
-            state.isLoading -> {
-                CircularProgressIndicator(modifier = Modifier.padding(padding))
-            }
-            state.error != null -> {
-                Text(
-                    text = state.error ?: "Error",
-                    modifier = Modifier.padding(padding)
-                )
-            }
-            else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(16.dp)
-                ) {
-                    items(state.medications) { medication ->
-                        LaunchedEffect(medication.id) {
-                            favoritesViewModel.checkIsFavorite(medication.id)
-                        }
-                        MedicationCard(
-                            medication = medication,
-                            isFavorite = favoritesMap[medication.id] ?: false,
-                            onToggleFavorite = {
-                                favoritesViewModel.toggleFavorite(medication)
-                            },
-                            onDelete = { id ->
-                                viewModel.deleteMedication(id)
-                            },
-                            onEdit = { med ->
-                                onNavigateToEdit(med)  // ← navega a pantalla dedicada
-                            }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFFF0F7FF),
+                            Color(0xFFFFFFFF)
                         )
+                    )
+                )
+        ) {
+            when {
+                state.isLoading -> {
+                    CircularProgressIndicator(modifier = Modifier.padding(padding))
+                }
+                state.error != null -> {
+                    Text(
+                        text = state.error ?: "Error",
+                        modifier = Modifier.padding(padding)
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(16.dp)
+                    ) {
+                        items(state.medications) { medication ->
+                            LaunchedEffect(medication.id) {
+                                favoritesViewModel.checkIsFavorite(medication.id)
+                            }
+                            MedicationCard(
+                                medication = medication,
+                                isFavorite = favoritesMap[medication.id] ?: false,
+                                onToggleFavorite = {
+                                    favoritesViewModel.toggleFavorite(medication)
+                                },
+                                onDelete = { id ->
+                                    viewModel.deleteMedication(id)
+                                },
+                                onEdit = { med ->
+                                    onNavigateToEdit(med)
+                                }
+                            )
+                        }
                     }
                 }
             }

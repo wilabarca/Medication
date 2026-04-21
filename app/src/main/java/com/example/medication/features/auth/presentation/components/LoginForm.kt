@@ -28,10 +28,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val Purple = Color(0xFF6650A4)
-private val TextColor = Color(0xFF1A1A2E)
+private val MedBlue = Color(0xFF0077B6)
+private val MedBlueDark = Color(0xFF003F5C)
+private val TextColor = Color(0xFF023E58)
 private val InputBackground = Color.White
-private val InputBorderIdle = Color(0xFFCCCCCC)
+private val InputBorderIdle = Color(0xFFB0D4E3)
 
 @Composable
 fun LoginForm(
@@ -53,7 +54,7 @@ fun LoginForm(
             .wrapContentHeight(),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F8F8))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F8FF))
     ) {
         Column(
             modifier = Modifier
@@ -62,16 +63,15 @@ fun LoginForm(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Título
             Text(
-                text = "Bienvenido",
+                text = "💊 Bienvenido",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextColor
+                color = MedBlueDark
             )
             Text(
-                text = "Inicia sesión para continuar",
-                fontSize = 13.sp,
+                text = "Inicia sesión para gestionar tus medicamentos",
+                fontSize = 12.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -84,22 +84,19 @@ fun LoginForm(
                 onValueChange = onUsuarioChange,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                placeholder = {
-                    Text("Correo electrónico", color = Color.Gray)
-                },
                 label = { Text("Correo electrónico", color = Color.Gray) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Email,
                         contentDescription = null,
-                        tint = if (hasError) Color.Red else Purple
+                        tint = if (hasError) Color.Red else MedBlue
                     )
                 },
                 isError = hasError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Purple,
+                    focusedBorderColor = MedBlue,
                     unfocusedBorderColor = InputBorderIdle,
                     errorBorderColor = Color.Red,
                     focusedContainerColor = InputBackground,
@@ -108,7 +105,7 @@ fun LoginForm(
                     focusedTextColor = TextColor,
                     unfocusedTextColor = TextColor,
                     errorTextColor = TextColor,
-                    cursorColor = Purple
+                    cursorColor = MedBlue
                 )
             )
 
@@ -120,13 +117,12 @@ fun LoginForm(
                 onValueChange = onContrasenaChange,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                placeholder = { Text("Contraseña", color = Color.Gray) },
                 label = { Text("Contraseña", color = Color.Gray) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Lock,
                         contentDescription = null,
-                        tint = if (hasError) Color.Red else Purple
+                        tint = if (hasError) Color.Red else MedBlue
                     )
                 },
                 trailingIcon = {
@@ -142,7 +138,7 @@ fun LoginForm(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Purple,
+                    focusedBorderColor = MedBlue,
                     unfocusedBorderColor = InputBorderIdle,
                     errorBorderColor = Color.Red,
                     focusedContainerColor = InputBackground,
@@ -151,7 +147,7 @@ fun LoginForm(
                     focusedTextColor = TextColor,
                     unfocusedTextColor = TextColor,
                     errorTextColor = TextColor,
-                    cursorColor = Purple
+                    cursorColor = MedBlue
                 )
             )
 
@@ -191,14 +187,13 @@ fun LoginForm(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón ingresar
             Button(
                 onClick = onIngresar,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Purple),
+                colors = ButtonDefaults.buttonColors(containerColor = MedBlue),
                 enabled = !isLoading,
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
@@ -220,7 +215,6 @@ fun LoginForm(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Registro
             Row {
                 Text(
                     text = "¿No tienes cuenta? ",
@@ -230,7 +224,7 @@ fun LoginForm(
                 Text(
                     text = "Registrarse",
                     fontSize = 13.sp,
-                    color = Purple,
+                    color = MedBlue,
                     fontWeight = FontWeight.SemiBold,
                     textDecoration = TextDecoration.Underline,
                     modifier = Modifier.clickable { onRegistrar() }

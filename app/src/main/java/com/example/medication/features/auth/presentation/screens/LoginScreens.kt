@@ -52,9 +52,9 @@ fun LoginScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF1A1A2E),
-                        Color(0xFF16213E),
-                        Color(0xFF0F3460)
+                        Color(0xFF003F5C),
+                        Color(0xFF0077B6),
+                        Color(0xFF00B4D8)
                     )
                 )
             ),
@@ -73,9 +73,7 @@ fun LoginScreen(
                 contrasena = it
                 if (uiState.errorMessage != null) viewModel.clearError()
             },
-            onIngresar = {
-                viewModel.login(usuario, contrasena)
-            },
+            onIngresar = { viewModel.login(usuario, contrasena) },
             onRegistrar = onRegistrar
         )
     }

@@ -35,19 +35,19 @@ import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import java.io.File
 
-// ── Paleta médica ──────────────────────────────────────────────────────────────
-private val MedBlue       = Color(0xFF1565C0)
-private val MedBlueDark   = Color(0xFF0D47A1)
-private val MedBlueLight  = Color(0xFFE3F2FD)
-private val MedGreen      = Color(0xFF2E7D32)
-private val MedGreenLight = Color(0xFFE8F5E9)
-private val MedTeal       = Color(0xFF00695C)
-private val MedRed        = Color(0xFFC62828)
-private val NeutralBg     = Color(0xFFF5F7FA)
-private val CardBg        = Color(0xFFFFFFFF)
-private val TextPrimary   = Color(0xFF1A2027)
-private val TextSecondary = Color(0xFF546E7A)
-private val Divider       = Color(0xFFECEFF1)
+// ── Paleta clínica – Registro (verde hospitalario) ────────────────────────────
+private val RgPrimary      = Color(0xFF0277BD)   // Azul hospital
+private val RgPrimaryDark  = Color(0xFF01579B)
+private val RgPrimaryLight = Color(0xFFE1F5FE)
+private val RgGreen        = Color(0xFF388E3C)   // Verde bienestar
+private val RgGreenLight   = Color(0xFFF1F8E9)
+private val RgTeal         = Color(0xFF00838F)   // Teal clínico
+private val RgRed          = Color(0xFFD32F2F)   // Rojo alerta
+private val RgNeutralBg    = Color(0xFFF4F6F9)
+private val RgCardBg       = Color(0xFFFFFFFF)
+private val RgTextPrimary  = Color(0xFF1C2B3A)
+private val RgTextSec      = Color(0xFF607D8B)
+private val RgDivider      = Color(0xFFE8EDF2)
 
 @Composable
 private fun MedField(
@@ -63,15 +63,15 @@ private fun MedField(
         onValueChange = onValueChange,
         label = { Text(label, fontSize = 13.sp) },
         leadingIcon = {
-            Icon(icon, contentDescription = null, tint = MedBlue, modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = null, tint = RgPrimary, modifier = Modifier.size(20.dp))
         },
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MedBlue,
+            focusedBorderColor = RgPrimary,
             unfocusedBorderColor = Color(0xFFB0BEC5),
-            focusedLabelColor = MedBlue,
-            unfocusedContainerColor = CardBg,
-            focusedContainerColor = CardBg
+            focusedLabelColor = RgPrimary,
+            unfocusedContainerColor = RgCardBg,
+            focusedContainerColor = RgCardBg
         ),
         modifier = modifier.fillMaxWidth(),
         minLines = minLines
@@ -83,14 +83,14 @@ private fun SectionHeader(title: String, icon: ImageVector) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.size(32.dp).background(MedBlueLight, CircleShape)
+            modifier = Modifier.size(32.dp).background(RgPrimaryLight, CircleShape)
         ) {
-            Icon(icon, contentDescription = null, tint = MedBlue, modifier = Modifier.size(18.dp))
+            Icon(icon, contentDescription = null, tint = RgPrimary, modifier = Modifier.size(18.dp))
         }
         Spacer(Modifier.width(10.dp))
-        Text(title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = MedBlue, letterSpacing = 0.5.sp)
+        Text(title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = RgPrimary, letterSpacing = 0.5.sp)
         Spacer(Modifier.width(10.dp))
-        HorizontalDivider(color = Divider, modifier = Modifier.weight(1f))
+        HorizontalDivider(color = RgDivider, modifier = Modifier.weight(1f))
     }
 }
 
@@ -103,7 +103,7 @@ fun MedicationSuccessDialog(medicationName: String, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = CardBg),
+            colors = CardDefaults.cardColors(containerColor = RgCardBg),
             modifier = Modifier.fillMaxWidth().shadow(16.dp, RoundedCornerShape(24.dp))
         ) {
             Column(
@@ -115,14 +115,14 @@ fun MedicationSuccessDialog(medicationName: String, onDismiss: () -> Unit) {
                     modifier = Modifier
                         .size(80.dp)
                         .background(
-                            Brush.radialGradient(listOf(MedGreenLight, Color(0xFFA5D6A7))),
+                            Brush.radialGradient(listOf(RgGreenLight, Color(0xFFA5D6A7))),
                             CircleShape
                         )
                 ) {
                     Icon(
                         Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = MedGreen,
+                        tint = RgGreen,
                         modifier = Modifier.size(48.dp)
                     )
                 }
@@ -131,25 +131,25 @@ fun MedicationSuccessDialog(medicationName: String, onDismiss: () -> Unit) {
                     "¡Medicamento Registrado!",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    color = TextPrimary,
+                    color = RgTextPrimary,
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.height(10.dp))
                 Box(
                     modifier = Modifier
-                        .background(MedBlueLight, RoundedCornerShape(20.dp))
+                        .background(RgPrimaryLight, RoundedCornerShape(20.dp))
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.MedicalServices, contentDescription = null, tint = MedBlue, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.MedicalServices, contentDescription = null, tint = RgPrimary, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(medicationName, fontWeight = FontWeight.SemiBold, color = MedBlue, fontSize = 14.sp)
+                        Text(medicationName, fontWeight = FontWeight.SemiBold, color = RgPrimary, fontSize = 14.sp)
                     }
                 }
                 Spacer(Modifier.height(10.dp))
                 Text(
                     "El medicamento fue agregado exitosamente al inventario.",
-                    color = TextSecondary,
+                    color = RgTextSec,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )
@@ -157,7 +157,7 @@ fun MedicationSuccessDialog(medicationName: String, onDismiss: () -> Unit) {
                 Button(
                     onClick = onDismiss,
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MedBlue),
+                    colors = ButtonDefaults.buttonColors(containerColor = RgPrimary),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(Icons.Default.Done, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -230,7 +230,7 @@ fun RegisterMedicationForm(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(NeutralBg)) {
+    Box(modifier = Modifier.fillMaxSize().background(RgNeutralBg)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
@@ -242,7 +242,7 @@ fun RegisterMedicationForm(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        Brush.horizontalGradient(listOf(MedBlueDark, MedTeal)),
+                        Brush.horizontalGradient(listOf(RgPrimaryDark, RgTeal)),
                         RoundedCornerShape(20.dp)
                     )
                     .padding(20.dp)
@@ -267,7 +267,7 @@ fun RegisterMedicationForm(
             // ── Información básica ─────────────────────────────────────────
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBg),
+                colors = CardDefaults.cardColors(containerColor = RgCardBg),
                 modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(16.dp))
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(16.dp)) {
@@ -281,7 +281,7 @@ fun RegisterMedicationForm(
             // ── Indicaciones ───────────────────────────────────────────────
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBg),
+                colors = CardDefaults.cardColors(containerColor = RgCardBg),
                 modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(16.dp))
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(16.dp)) {
@@ -294,7 +294,7 @@ fun RegisterMedicationForm(
             // ── Inventario ─────────────────────────────────────────────────
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBg),
+                colors = CardDefaults.cardColors(containerColor = RgCardBg),
                 modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(16.dp))
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(16.dp)) {
@@ -307,7 +307,7 @@ fun RegisterMedicationForm(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(if (isActive) MedGreenLight else Color(0xFFFFEBEE), RoundedCornerShape(12.dp))
+                            .background(if (isActive) RgGreenLight else Color(0xFFFFEBEE), RoundedCornerShape(12.dp))
                             .border(1.dp, if (isActive) Color(0xFFA5D6A7) else Color(0xFFEF9A9A), RoundedCornerShape(12.dp))
                             .padding(horizontal = 14.dp, vertical = 4.dp)
                     ) {
@@ -320,15 +320,15 @@ fun RegisterMedicationForm(
                                 Icon(
                                     if (isActive) Icons.Default.CheckCircle else Icons.Default.Cancel,
                                     contentDescription = null,
-                                    tint = if (isActive) MedGreen else MedRed,
+                                    tint = if (isActive) RgGreen else RgRed,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Column {
-                                    Text("Estado del medicamento", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = TextPrimary)
+                                    Text("Estado del medicamento", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = RgTextPrimary)
                                     Text(
                                         if (isActive) "Activo · Disponible en inventario" else "Inactivo · No disponible",
-                                        fontSize = 11.sp, color = TextSecondary
+                                        fontSize = 11.sp, color = RgTextSec
                                     )
                                 }
                             }
@@ -336,9 +336,9 @@ fun RegisterMedicationForm(
                                 checked = isActive,
                                 onCheckedChange = { isActive = it },
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = MedGreen,
+                                    checkedThumbColor = RgGreen,
                                     checkedTrackColor = Color(0xFFA5D6A7),
-                                    uncheckedThumbColor = MedRed,
+                                    uncheckedThumbColor = RgRed,
                                     uncheckedTrackColor = Color(0xFFEF9A9A)
                                 )
                             )
@@ -350,7 +350,7 @@ fun RegisterMedicationForm(
             // ── Fotografía ─────────────────────────────────────────────────
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBg),
+                colors = CardDefaults.cardColors(containerColor = RgCardBg),
                 modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(16.dp))
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(16.dp)) {
@@ -362,7 +362,7 @@ fun RegisterMedicationForm(
                                     .fillMaxWidth()
                                     .height(180.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .border(2.dp, MedBlueLight, RoundedCornerShape(12.dp))
+                                    .border(2.dp, RgPrimaryLight, RoundedCornerShape(12.dp))
                             ) {
                                 Image(
                                     painter = rememberAsyncImagePainter(photoUri),
@@ -375,7 +375,7 @@ fun RegisterMedicationForm(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
                                         .padding(8.dp)
-                                        .background(MedGreen, CircleShape)
+                                        .background(RgGreen, CircleShape)
                                         .padding(4.dp)
                                 ) {
                                     Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
@@ -386,9 +386,9 @@ fun RegisterMedicationForm(
                     OutlinedButton(
                         onClick = { permissionLauncher.launch(android.Manifest.permission.CAMERA) },
                         shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.5.dp, MedBlue),
+                        border = androidx.compose.foundation.BorderStroke(1.5.dp, RgPrimary),
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MedBlue)
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = RgPrimary)
                     ) {
                         Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
@@ -400,13 +400,13 @@ fun RegisterMedicationForm(
                 }
             }
 
-            // ── Botón guardar — solo dispara onRegister, sin lógica de éxito ──
+            // ── Botón guardar ──────────────────────────────────────────────
             Button(
                 onClick = {
                     onRegister(name, dosage, form, instructions, notes, quantity, price, isActive, photoPath)
                 },
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MedBlue),
+                colors = ButtonDefaults.buttonColors(containerColor = RgPrimary),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp)

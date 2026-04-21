@@ -5,9 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "medications")
 data class MedicationEntity(
-    @PrimaryKey
-    val id: String,
-    val userId: String,
+    @PrimaryKey val id: String,
+    val patientId: String,
     val name: String,
     val dosage: String,
     val form: String,
@@ -16,5 +15,7 @@ data class MedicationEntity(
     val quantity: Int,
     val price: Double? = null,
     val isActive: Boolean = true,
+    val startDate: String? = null,
+    val endDate: String? = null,
     val photoPath: String? = null
 )

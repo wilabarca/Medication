@@ -38,6 +38,8 @@ class RegisterMedicationViewModel @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean = true,
+        startDate: String? = null,  // ← nuevo
+        endDate: String? = null,    // ← nuevo
         photoPath: String? = null
     ) {
         viewModelScope.launch {
@@ -49,12 +51,11 @@ class RegisterMedicationViewModel @Inject constructor(
             )
 
             try {
-                val currentUserId = jwtSessionManager.getUserId()
+                val currentPatientId = jwtSessionManager.getUserId()  // sigue siendo el mismo método
 
-                if (currentUserId.isNullOrBlank()) {
+                if (currentPatientId.isNullOrBlank()) {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        isSuccess = false,
                         error = "No se pudo obtener el usuario actual desde el token"
                     )
                     return@launch
@@ -63,17 +64,19 @@ class RegisterMedicationViewModel @Inject constructor(
                 val deviceId = deviceIdProvider.getDeviceId()
 
                 postMedicationUseCase(
-                    userId = currentUserId,
-                    name = name,
-                    dosage = dosage,
-                    form = form,
+                    patientId    = currentPatientId,
+                    name         = name,
+                    dosage       = dosage,
+                    form         = form,
                     instructions = instructions,
-                    notes = notes,
-                    quantity = quantity,
-                    price = price,
-                    isActive = isActive,
-                    photoPath = photoPath,
-                    deviceId = deviceId
+                    notes        = notes,
+                    quantity     = quantity,
+                    price        = price,
+                    isActive     = isActive,
+                    startDate    = startDate,
+                    endDate      = endDate,
+                    photoPath    = photoPath,
+                    deviceId     = deviceId
                 )
 
                 _uiState.value = _uiState.value.copy(
@@ -84,7 +87,6 @@ class RegisterMedicationViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    isSuccess = false,
                     error = "❌ Error al registrar: ${e.message ?: "Error desconocido"}"
                 )
             }
