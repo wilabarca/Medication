@@ -7,7 +7,7 @@ class PostMedicationUseCase @Inject constructor(
     private val repository: MedicationRepository
 ) {
     suspend operator fun invoke(
-        userId: String,
+        patientId: String,        // ← userId → patientId
         name: String,
         dosage: String,
         form: String,
@@ -16,21 +16,25 @@ class PostMedicationUseCase @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean = true,
+        startDate: String? = null, // ← nuevo
+        endDate: String? = null,   // ← nuevo
         photoPath: String? = null,
         deviceId: String
     ) {
         repository.createMedication(
-            userId = userId,
-            name = name,
-            dosage = dosage,
-            form = form,
+            patientId    = patientId,
+            name         = name,
+            dosage       = dosage,
+            form         = form,
             instructions = instructions,
-            notes = notes,
-            quantity = quantity,
-            price = price,
-            isActive = isActive,
-            photoPath = photoPath,
-            deviceId = deviceId
+            notes        = notes,
+            quantity     = quantity,
+            price        = price,
+            isActive     = isActive,
+            startDate    = startDate,
+            endDate      = endDate,
+            photoPath    = photoPath,
+            deviceId     = deviceId
         )
     }
 }

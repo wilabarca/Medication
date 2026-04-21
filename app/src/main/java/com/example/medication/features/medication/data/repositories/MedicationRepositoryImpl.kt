@@ -23,35 +23,24 @@ class MedicationRepositoryImpl @Inject constructor(
         remoteMedications.forEach { dto ->
             val id = dto.id ?: return@forEach
             val existing = dao.getById(id)
-
-            dao.insertMedication(
-                dto.toEntity(
-                    photoPath = existing?.photoPath
-                )
-            )
+            dao.insertMedication(dto.toEntity(photoPath = existing?.photoPath))
         }
 
         val remoteIds = remoteMedications.mapNotNull { it.id }.toSet()
         val localIds = dao.getAllMedications().map { it.id }.toSet()
+        localIds.filter { it !in remoteIds }.forEach { id -> dao.deleteById(id) }
 
-        localIds.filter { it !in remoteIds }.forEach { id ->
-            dao.deleteById(id)
-        }
-
-        return dao.getAllMedications().map { entity ->
-            entity.toDomain()
-        }
+        return dao.getAllMedications().map { it.toDomain() }
     }
 
     override suspend fun getMedicationById(id: String): Medication {
         val remote = api.getMedicationById(id).toDomain()
         val local = dao.getById(id)
-
         return remote.copy(photoPath = local?.photoPath)
     }
 
     override suspend fun createMedication(
-        userId: String,
+        patientId: String,        // ← userId → patientId
         name: String,
         dosage: String,
         form: String,
@@ -60,37 +49,36 @@ class MedicationRepositoryImpl @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean,
+        startDate: String?,       // ← nuevo
+        endDate: String?,         // ← nuevo
         photoPath: String?,
         deviceId: String
     ) {
         val request = CreateMedicationRequest(
-            userId = userId,
-            name = name,
-            dosage = dosage,
-            form = form,
+            patientId    = patientId,
+            name         = name,
+            dosage       = dosage,
+            form         = form,
             instructions = instructions,
-            notes = notes,
-            quantity = quantity,
-            price = price,
-            isActive = isActive,
-            deviceId = deviceId
+            notes        = notes,
+            quantity     = quantity,
+            price        = price,
+            isActive     = isActive,
+            startDate    = startDate,
+            endDate      = endDate,
+            deviceId     = deviceId
         )
 
         val created = api.createMedication(request).data
 
-        dao.insertMedication(
-            created.toEntity(photoPath = photoPath)
-        )
+        dao.insertMedication(created.toEntity(photoPath = photoPath))
 
-        Log.d(
-            "PHOTO_DEBUG",
-            "createMedication insertó photoPath: $photoPath para id: ${created.id}"
-        )
+        Log.d("PHOTO_DEBUG", "createMedication insertó photoPath: $photoPath para id: ${created.id}")
     }
 
     override suspend fun updateMedication(
         id: String,
-        userId: String,
+        patientId: String,        // ← userId → patientId
         name: String,
         dosage: String,
         form: String,
@@ -99,44 +87,47 @@ class MedicationRepositoryImpl @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean,
+        startDate: String?,       // ← nuevo
+        endDate: String?,         // ← nuevo
         photoPath: String?,
         deviceId: String
     ): Medication {
         val request = UpdateMedicationRequest(
-            userId = userId,
-            name = name,
-            dosage = dosage,
-            form = form,
+            patientId    = patientId,
+            name         = name,
+            dosage       = dosage,
+            form         = form,
             instructions = instructions,
-            notes = notes,
-            quantity = quantity,
-            price = price,
-            isActive = isActive,
-            deviceId = deviceId
+            notes        = notes,
+            quantity     = quantity,
+            price        = price,
+            isActive     = isActive,
+            startDate    = startDate,
+            endDate      = endDate,
+            deviceId     = deviceId
         )
 
         val remote = api.updateMedication(id, request).data.toDomain()
 
         dao.insertMedication(
             MedicationEntity(
-                id = remote.id,
-                userId = remote.userId,
-                name = remote.name,
-                dosage = remote.dosage,
-                form = remote.form,
+                id           = remote.id,
+                patientId    = remote.patientId,
+                name         = remote.name,
+                dosage       = remote.dosage,
+                form         = remote.form,
                 instructions = remote.instructions,
-                notes = remote.notes,
-                quantity = remote.quantity,
-                price = remote.price,
-                isActive = remote.isActive,
-                photoPath = photoPath
+                notes        = remote.notes,
+                quantity     = remote.quantity,
+                price        = remote.price,
+                isActive     = remote.isActive,
+                startDate    = remote.startDate,
+                endDate      = remote.endDate,
+                photoPath    = photoPath
             )
         )
 
-        Log.d(
-            "PHOTO_DEBUG",
-            "updateMedication guardó photoPath: $photoPath para id: $id"
-        )
+        Log.d("PHOTO_DEBUG", "updateMedication guardó photoPath: $photoPath para id: $id")
 
         return remote.copy(photoPath = photoPath)
     }
@@ -147,40 +138,45 @@ class MedicationRepositoryImpl @Inject constructor(
         Log.d("PHOTO_DEBUG", "deleteMedication borró id: $id de Room")
     }
 
+    // ── Mappers privados ──────────────────────────────────────────
     private fun MedicationDto.toEntity(photoPath: String?): MedicationEntity {
         return MedicationEntity(
-            id = this.id ?: "",
-            userId = this.userId ?: "",
-            name = this.name ?: "",
-            dosage = this.dosage ?: "",
-            form = this.form ?: "",
+            id           = this.id ?: "",
+            patientId    = this.patientId ?: "",
+            name         = this.name ?: "",
+            dosage       = this.dosage ?: "",
+            form         = this.form ?: "",
             instructions = this.instructions,
-            notes = this.notes,
-            quantity = this.quantity ?: 0,
-            price = when (val p = this.price) {
+            notes        = this.notes,
+            quantity     = this.quantity ?: 0,
+            price        = when (val p = this.price) {
                 is Double -> p
                 is String -> p.toDoubleOrNull()
                 is Number -> p.toDouble()
-                else -> null
+                else      -> null
             },
-            isActive = this.isActive ?: true,
-            photoPath = photoPath
+            isActive     = this.isActive ?: true,
+            startDate    = this.startDate,
+            endDate      = this.endDate,
+            photoPath    = photoPath
         )
     }
 
     private fun MedicationEntity.toDomain(): Medication {
         return Medication(
-            id = this.id,
-            userId = this.userId,
-            name = this.name,
-            dosage = this.dosage,
-            form = this.form,
+            id           = this.id,
+            patientId    = this.patientId,
+            name         = this.name,
+            dosage       = this.dosage,
+            form         = this.form,
             instructions = this.instructions,
-            notes = this.notes,
-            quantity = this.quantity,
-            price = this.price,
-            isActive = this.isActive,
-            photoPath = this.photoPath
+            notes        = this.notes,
+            quantity     = this.quantity,
+            price        = this.price,
+            isActive     = this.isActive,
+            startDate    = this.startDate,
+            endDate      = this.endDate,
+            photoPath    = this.photoPath
         )
     }
 }

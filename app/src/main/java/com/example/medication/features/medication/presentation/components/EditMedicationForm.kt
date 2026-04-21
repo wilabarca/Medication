@@ -37,21 +37,21 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.medication.features.medication.domain.entities.Medication
 import java.io.File
 
-// ── Paleta médica (misma que RegisterMedicationForm) ──────────────────────────
-private val MedBlue       = Color(0xFF1565C0)
-private val MedBlueDark   = Color(0xFF0D47A1)
-private val MedBlueLight  = Color(0xFFE3F2FD)
-private val MedGreen      = Color(0xFF2E7D32)
-private val MedGreenLight = Color(0xFFE8F5E9)
-private val MedTeal       = Color(0xFF00695C)
-private val MedRed        = Color(0xFFC62828)
-private val MedAmber      = Color(0xFFE65100)   // color de acento para "editar"
-private val MedAmberLight = Color(0xFFFFF3E0)
-private val NeutralBg     = Color(0xFFF5F7FA)
-private val CardBg        = Color(0xFFFFFFFF)
-private val TextPrimary   = Color(0xFF1A2027)
-private val TextSecondary = Color(0xFF546E7A)
-private val DividerColor  = Color(0xFFECEFF1)
+// ── Paleta clínica – Edición (ámbar quirúrgico) ───────────────────────────────
+private val EdPrimary      = Color(0xFF1565C0)   // Azul farmacia
+private val EdPrimaryDark  = Color(0xFF0D47A1)
+private val EdPrimaryLight = Color(0xFFE3F2FD)
+private val EdGreen        = Color(0xFF2E7D32)   // Verde salud
+private val EdGreenLight   = Color(0xFFE8F5E9)
+private val EdTeal         = Color(0xFF00695C)   // Teal quirúrgico
+private val EdRed          = Color(0xFFC62828)   // Rojo urgencias
+private val EdAmber        = Color(0xFFE65100)   // Ámbar – acento edición
+private val EdAmberLight   = Color(0xFFFFF3E0)
+private val EdNeutralBg    = Color(0xFFF0F4F8)
+private val EdCardBg       = Color(0xFFFFFFFF)
+private val EdTextPrimary  = Color(0xFF1A2027)
+private val EdTextSec      = Color(0xFF546E7A)
+private val EdDivider      = Color(0xFFECEFF1)
 
 // ── Campo con ícono ────────────────────────────────────────────────────────────
 @Composable
@@ -68,15 +68,15 @@ private fun MedField(
         onValueChange = onValueChange,
         label = { Text(label, fontSize = 13.sp) },
         leadingIcon = {
-            Icon(icon, contentDescription = null, tint = MedBlue, modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = null, tint = EdPrimary, modifier = Modifier.size(20.dp))
         },
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MedBlue,
+            focusedBorderColor = EdPrimary,
             unfocusedBorderColor = Color(0xFFB0BEC5),
-            focusedLabelColor = MedBlue,
-            unfocusedContainerColor = CardBg,
-            focusedContainerColor = CardBg
+            focusedLabelColor = EdPrimary,
+            unfocusedContainerColor = EdCardBg,
+            focusedContainerColor = EdCardBg
         ),
         modifier = modifier.fillMaxWidth(),
         minLines = minLines
@@ -89,14 +89,14 @@ private fun SectionHeader(title: String, icon: ImageVector) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.size(32.dp).background(MedBlueLight, CircleShape)
+            modifier = Modifier.size(32.dp).background(EdPrimaryLight, CircleShape)
         ) {
-            Icon(icon, contentDescription = null, tint = MedBlue, modifier = Modifier.size(18.dp))
+            Icon(icon, contentDescription = null, tint = EdPrimary, modifier = Modifier.size(18.dp))
         }
         Spacer(Modifier.width(10.dp))
-        Text(title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = MedBlue, letterSpacing = 0.5.sp)
+        Text(title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = EdPrimary, letterSpacing = 0.5.sp)
         Spacer(Modifier.width(10.dp))
-        HorizontalDivider(color = DividerColor, modifier = Modifier.weight(1f))
+        HorizontalDivider(color = EdDivider, modifier = Modifier.weight(1f))
     }
 }
 
@@ -109,7 +109,7 @@ fun MedicationUpdateSuccessDialog(medicationName: String, onDismiss: () -> Unit)
     Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = CardBg),
+            colors = CardDefaults.cardColors(containerColor = EdCardBg),
             modifier = Modifier.fillMaxWidth().shadow(16.dp, RoundedCornerShape(24.dp))
         ) {
             Column(
@@ -122,14 +122,14 @@ fun MedicationUpdateSuccessDialog(medicationName: String, onDismiss: () -> Unit)
                     modifier = Modifier
                         .size(80.dp)
                         .background(
-                            Brush.radialGradient(listOf(MedAmberLight, Color(0xFFFFCC80))),
+                            Brush.radialGradient(listOf(EdAmberLight, Color(0xFFFFCC80))),
                             CircleShape
                         )
                 ) {
                     Icon(
                         Icons.Default.EditNote,
                         contentDescription = null,
-                        tint = MedAmber,
+                        tint = EdAmber,
                         modifier = Modifier.size(48.dp)
                     )
                 }
@@ -140,7 +140,7 @@ fun MedicationUpdateSuccessDialog(medicationName: String, onDismiss: () -> Unit)
                     "¡Medicamento Actualizado!",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    color = TextPrimary,
+                    color = EdTextPrimary,
                     textAlign = TextAlign.Center
                 )
 
@@ -149,21 +149,21 @@ fun MedicationUpdateSuccessDialog(medicationName: String, onDismiss: () -> Unit)
                 // Chip con nombre del medicamento
                 Box(
                     modifier = Modifier
-                        .background(MedBlueLight, RoundedCornerShape(20.dp))
+                        .background(EdPrimaryLight, RoundedCornerShape(20.dp))
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             Icons.Default.MedicalServices,
                             contentDescription = null,
-                            tint = MedBlue,
+                            tint = EdPrimary,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(
                             medicationName,
                             fontWeight = FontWeight.SemiBold,
-                            color = MedBlue,
+                            color = EdPrimary,
                             fontSize = 14.sp
                         )
                     }
@@ -173,7 +173,7 @@ fun MedicationUpdateSuccessDialog(medicationName: String, onDismiss: () -> Unit)
 
                 Text(
                     "Los cambios fueron guardados exitosamente en el inventario.",
-                    color = TextSecondary,
+                    color = EdTextSec,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )
@@ -183,7 +183,7 @@ fun MedicationUpdateSuccessDialog(medicationName: String, onDismiss: () -> Unit)
                 Button(
                     onClick = onDismiss,
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MedBlue),
+                    colors = ButtonDefaults.buttonColors(containerColor = EdPrimary),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(Icons.Default.Done, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -215,15 +215,15 @@ fun EditMedicationForm(
         photoPath: String?
     ) -> Unit
 ) {
-    var name         by rememberSaveable { mutableStateOf(medication.name) }
-    var dosage       by rememberSaveable { mutableStateOf(medication.dosage) }
-    var form         by rememberSaveable { mutableStateOf(medication.form) }
-    var instructions by rememberSaveable { mutableStateOf(medication.instructions ?: "") }
-    var notes        by rememberSaveable { mutableStateOf(medication.notes ?: "") }
-    var quantity     by rememberSaveable { mutableStateOf(medication.quantity.toString()) }
-    var price        by rememberSaveable { mutableStateOf(medication.price?.toString() ?: "") }
-    var isActive     by rememberSaveable { mutableStateOf(medication.isActive) }
-    var photoPath    by rememberSaveable { mutableStateOf<String?>(medication.photoPath) }
+    var name          by rememberSaveable { mutableStateOf(medication.name) }
+    var dosage        by rememberSaveable { mutableStateOf(medication.dosage) }
+    var form          by rememberSaveable { mutableStateOf(medication.form) }
+    var instructions  by rememberSaveable { mutableStateOf(medication.instructions ?: "") }
+    var notes         by rememberSaveable { mutableStateOf(medication.notes ?: "") }
+    var quantity      by rememberSaveable { mutableStateOf(medication.quantity.toString()) }
+    var price         by rememberSaveable { mutableStateOf(medication.price?.toString() ?: "") }
+    var isActive      by rememberSaveable { mutableStateOf(medication.isActive) }
+    var photoPath     by rememberSaveable { mutableStateOf<String?>(medication.photoPath) }
     var imageFilePath by rememberSaveable { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
@@ -271,7 +271,7 @@ fun EditMedicationForm(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(NeutralBg)) {
+    Box(modifier = Modifier.fillMaxSize().background(EdNeutralBg)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
@@ -283,7 +283,7 @@ fun EditMedicationForm(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        Brush.horizontalGradient(listOf(MedAmber, MedTeal)),
+                        Brush.horizontalGradient(listOf(EdAmber, EdTeal)),
                         RoundedCornerShape(20.dp)
                     )
                     .padding(20.dp)
@@ -323,7 +323,7 @@ fun EditMedicationForm(
             // ── Información básica ─────────────────────────────────────────
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBg),
+                colors = CardDefaults.cardColors(containerColor = EdCardBg),
                 modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(16.dp))
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(16.dp)) {
@@ -337,7 +337,7 @@ fun EditMedicationForm(
             // ── Indicaciones ───────────────────────────────────────────────
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBg),
+                colors = CardDefaults.cardColors(containerColor = EdCardBg),
                 modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(16.dp))
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(16.dp)) {
@@ -350,7 +350,7 @@ fun EditMedicationForm(
             // ── Inventario ─────────────────────────────────────────────────
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBg),
+                colors = CardDefaults.cardColors(containerColor = EdCardBg),
                 modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(16.dp))
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(16.dp)) {
@@ -364,7 +364,7 @@ fun EditMedicationForm(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(
-                                if (isActive) MedGreenLight else Color(0xFFFFEBEE),
+                                if (isActive) EdGreenLight else Color(0xFFFFEBEE),
                                 RoundedCornerShape(12.dp)
                             )
                             .border(
@@ -383,15 +383,15 @@ fun EditMedicationForm(
                                 Icon(
                                     if (isActive) Icons.Default.CheckCircle else Icons.Default.Cancel,
                                     contentDescription = null,
-                                    tint = if (isActive) MedGreen else MedRed,
+                                    tint = if (isActive) EdGreen else EdRed,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Column {
-                                    Text("Estado del medicamento", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = TextPrimary)
+                                    Text("Estado del medicamento", fontWeight = FontWeight.Medium, fontSize = 13.sp, color = EdTextPrimary)
                                     Text(
                                         if (isActive) "Activo · Disponible en inventario" else "Inactivo · No disponible",
-                                        fontSize = 11.sp, color = TextSecondary
+                                        fontSize = 11.sp, color = EdTextSec
                                     )
                                 }
                             }
@@ -399,9 +399,9 @@ fun EditMedicationForm(
                                 checked = isActive,
                                 onCheckedChange = { isActive = it },
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = MedGreen,
+                                    checkedThumbColor = EdGreen,
                                     checkedTrackColor = Color(0xFFA5D6A7),
-                                    uncheckedThumbColor = MedRed,
+                                    uncheckedThumbColor = EdRed,
                                     uncheckedTrackColor = Color(0xFFEF9A9A)
                                 )
                             )
@@ -413,7 +413,7 @@ fun EditMedicationForm(
             // ── Fotografía ─────────────────────────────────────────────────
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBg),
+                colors = CardDefaults.cardColors(containerColor = EdCardBg),
                 modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(16.dp))
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(16.dp)) {
@@ -424,7 +424,7 @@ fun EditMedicationForm(
                                 .fillMaxWidth()
                                 .height(180.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .border(2.dp, MedBlueLight, RoundedCornerShape(12.dp))
+                                .border(2.dp, EdPrimaryLight, RoundedCornerShape(12.dp))
                         ) {
                             Image(
                                 painter = rememberAsyncImagePainter(photoUri),
@@ -437,7 +437,7 @@ fun EditMedicationForm(
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
                                     .padding(8.dp)
-                                    .background(MedGreen, CircleShape)
+                                    .background(EdGreen, CircleShape)
                                     .padding(4.dp)
                             ) {
                                 Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
@@ -453,18 +453,18 @@ fun EditMedicationForm(
                                 .border(1.dp, Color(0xFFCFD8DC), RoundedCornerShape(12.dp))
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.ImageNotSupported, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.ImageNotSupported, contentDescription = null, tint = EdTextSec, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(8.dp))
-                                Text("Sin fotografía", color = TextSecondary, fontSize = 13.sp)
+                                Text("Sin fotografía", color = EdTextSec, fontSize = 13.sp)
                             }
                         }
                     }
                     OutlinedButton(
                         onClick = { permissionLauncher.launch(android.Manifest.permission.CAMERA) },
                         shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.5.dp, MedBlue),
+                        border = androidx.compose.foundation.BorderStroke(1.5.dp, EdPrimary),
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MedBlue)
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = EdPrimary)
                     ) {
                         Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
@@ -476,7 +476,7 @@ fun EditMedicationForm(
                 }
             }
 
-            // ── Botón actualizar — solo dispara onUpdate, sin lógica de éxito ──
+            // ── Botón actualizar ───────────────────────────────────────────
             Button(
                 onClick = {
                     onUpdate(
@@ -492,7 +492,7 @@ fun EditMedicationForm(
                     )
                 },
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MedAmber),
+                colors = ButtonDefaults.buttonColors(containerColor = EdAmber),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp)

@@ -9,7 +9,7 @@ interface MedicationRepository {
     suspend fun getMedicationById(id: String): Medication
 
     suspend fun createMedication(
-        userId: String,
+        patientId: String,        // ← userId → patientId
         name: String,
         dosage: String,
         form: String,
@@ -18,13 +18,15 @@ interface MedicationRepository {
         quantity: Int,
         price: Double?,
         isActive: Boolean,
+        startDate: String? = null,  // ← nuevo
+        endDate: String? = null,    // ← nuevo
         photoPath: String?,
         deviceId: String
     )
 
     suspend fun updateMedication(
         id: String,
-        userId: String,
+        patientId: String,        // ← userId → patientId
         name: String,
         dosage: String,
         form: String,
@@ -33,6 +35,8 @@ interface MedicationRepository {
         quantity: Int,
         price: Double?,
         isActive: Boolean,
+        startDate: String? = null,  // ← nuevo
+        endDate: String? = null,    // ← nuevo
         photoPath: String?,
         deviceId: String
     ): Medication
