@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -19,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.medication.features.favorites.presentation.viewmodels.FavoritesViewModel
 import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.presentation.components.MedicationCard
@@ -35,8 +37,8 @@ fun HomeMedicationScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     favoritesViewModel: FavoritesViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiState.collectAsState()
-    val favoritesMap by favoritesViewModel.favoritesMap.collectAsState()
+    val state        by viewModel.uiState.collectAsStateWithLifecycle()
+    val favoritesMap by favoritesViewModel.favoritesMap.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner) {
@@ -62,7 +64,7 @@ fun HomeMedicationScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    containerColor    = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
@@ -70,16 +72,16 @@ fun HomeMedicationScreen(
         floatingActionButton = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 FloatingActionButton(
-                    onClick = onNavigateToAlarm,
+                    onClick        = onNavigateToAlarm,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    contentColor   = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(Icons.Default.Alarm, contentDescription = "Alarma")
                 }
                 FloatingActionButton(
-                    onClick = onNavigateToRegister,
+                    onClick        = onNavigateToRegister,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    contentColor   = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Agregar")
                 }
@@ -91,37 +93,46 @@ fun HomeMedicationScreen(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFF0F7FF),
-                            Color(0xFFFFFFFF)
-                        )
+                        colors = listOf(Color(0xFFF0F7FF), Color(0xFFFFFFFF))
                     )
                 )
         ) {
             when {
                 state.isLoading -> {
-                    CircularProgressIndicator(modifier = Modifier.padding(padding))
-                }
-                state.error != null -> {
-                    Text(
-                        text = state.error ?: "Error",
-                        modifier = Modifier.padding(padding)
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(padding)
                     )
                 }
+
+                state.error != null -> {
+                    Text(
+                        text     = state.error ?: "Error",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(padding)
+                    )
+                }
+
                 else -> {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(padding)
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(state.medications) { medication ->
+                        items(
+                            items = state.medications,
+                            key   = { it.id }          // ← key estable evita recomposiciones innecesarias
+                        ) { medication ->
                             LaunchedEffect(medication.id) {
                                 favoritesViewModel.checkIsFavorite(medication.id)
                             }
                             MedicationCard(
-                                medication = medication,
-                                isFavorite = favoritesMap[medication.id] ?: false,
+                                medication      = medication,
+                                isFavorite      = favoritesMap[medication.id] ?: false,
                                 onToggleFavorite = {
                                     favoritesViewModel.toggleFavorite(medication)
                                 },

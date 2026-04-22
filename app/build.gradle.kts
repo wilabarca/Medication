@@ -1,8 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.google.services) // ✅ SOLO este (NO duplicar)
+    alias(libs.plugins.google.services)
     alias(libs.plugins.hilt)
 }
 
@@ -29,20 +30,14 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
     buildFeatures {
         compose = true
     }
 }
 
+// jvmToolchain reemplaza compileOptions + kotlinOptions en una sola línea
 kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
-    }
+    jvmToolchain(21)
 }
 
 dependencies {
@@ -52,7 +47,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
 
-    // Compose
+    // Compose BOM
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
@@ -60,13 +55,14 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.runtime.saveable)
-    implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.material3)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
 
-    // Firebase (BOM)
+    // Firebase BOM
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
 
@@ -88,14 +84,23 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
-    // WorkManager
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    // WorkManager + Hilt Worker
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation("androidx.hilt:hilt-work:1.2.0")
     ksp("androidx.hilt:hilt-compiler:1.2.0")
 
-    // Coil (imágenes)
-    implementation("io.coil-kt:coil-compose:2.6.0")
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Gson
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.11.0")
+
+    // Testing
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

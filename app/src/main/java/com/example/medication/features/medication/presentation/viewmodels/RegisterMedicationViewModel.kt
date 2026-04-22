@@ -38,25 +38,25 @@ class RegisterMedicationViewModel @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean = true,
-        startDate: String? = null,  // ← nuevo
-        endDate: String? = null,    // ← nuevo
+        startDate: String? = null,
+        endDate: String? = null,
         photoPath: String? = null
     ) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
-                isLoading = true,
-                isSuccess = false,
+                isLoading      = true,
+                isSuccess      = false,
                 successMessage = null,
-                error = null
+                error          = null
             )
 
             try {
-                val currentPatientId = jwtSessionManager.getUserId()  // sigue siendo el mismo método
+                val currentPatientId = jwtSessionManager.getUserId()
 
                 if (currentPatientId.isNullOrBlank()) {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = "No se pudo obtener el usuario actual desde el token"
+                        error     = "No se pudo obtener el usuario actual"
                     )
                     return@launch
                 }
@@ -80,14 +80,15 @@ class RegisterMedicationViewModel @Inject constructor(
                 )
 
                 _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    isSuccess = true,
+                    isLoading      = false,
+                    isSuccess      = true,
                     successMessage = "✅ Medicamento \"$name\" registrado correctamente"
                 )
+
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = "❌ Error al registrar: ${e.message ?: "Error desconocido"}"
+                    error     = "❌ Error al registrar: ${e.message ?: "Error desconocido"}"
                 )
             }
         }

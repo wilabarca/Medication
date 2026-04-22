@@ -4,7 +4,6 @@ import com.example.medication.features.auth.domain.entities.User
 import com.example.medication.features.auth.domain.repositories.UserRepository
 import javax.inject.Inject
 
-
 class RegisterUserUseCase @Inject constructor(
     private val repository: UserRepository
 ) {
@@ -12,11 +11,14 @@ class RegisterUserUseCase @Inject constructor(
     suspend operator fun invoke(
         name: String,
         email: String,
-        password: String
+        password: String,
+        role: String
     ): User {
-
-        return repository.register(name, email, password)
-
+        return repository.register(
+            name = name,
+            email = email,
+            password = password,
+            role = role
+        )
     }
-
 }

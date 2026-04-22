@@ -30,36 +30,46 @@ class JwtSessionManager @Inject constructor(
         prefs.edit().remove(KEY_TOKEN).apply()
     }
 
-    fun getUserId(): String? {
+    // ── Decodifica el payload del JWT y extrae un campo ────────────────────────
+    private fun decodePayload(): JSONObject? {
         val token = getToken() ?: return null
-
         return try {
             val parts = token.split(".")
-            Log.d("JWT_DEBUG", "parts size -> ${parts.size}")
-
             if (parts.size < 2) return null
-
-            val payload = parts[1]
-            Log.d("JWT_DEBUG", "payload raw -> $payload")
-
             val decodedBytes = Base64.decode(
-                payload,
+                parts[1],
                 Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
             )
-
             val json = String(decodedBytes, StandardCharsets.UTF_8)
             Log.d("JWT_DEBUG", "payload decoded -> $json")
-
-            val jsonObject = JSONObject(json)
-            val userId = if (jsonObject.has("id")) jsonObject.getString("id") else null
-
-            Log.d("JWT_DEBUG", "userId -> $userId")
-            userId
+            JSONObject(json)
         } catch (e: Exception) {
             Log.e("JWT_DEBUG", "Error decoding token", e)
             null
         }
     }
+
+    fun getUserId(): String? {
+        val payload = decodePayload() ?: return null
+        val userId = if (payload.has("id")) payload.getString("id") else null
+        Log.d("JWT_DEBUG", "userId -> $userId")
+        return userId
+    }
+
+    // ── Nuevo: obtener el rol directamente del token ───────────────────────────
+    fun getRole(): String? {
+        val payload = decodePayload() ?: return null
+        // Busca "role" o "roles" según lo que devuelva tu backend
+        val role = when {
+            payload.has("role")  -> payload.getString("role")
+            payload.has("roles") -> payload.getString("roles")
+            else -> null
+        }
+        Log.d("JWT_DEBUG", "role -> $role")
+        return role
+    }
+
+    fun isLoggedIn(): Boolean = getToken() != null
 
     companion object {
         private const val KEY_TOKEN = "auth_token"

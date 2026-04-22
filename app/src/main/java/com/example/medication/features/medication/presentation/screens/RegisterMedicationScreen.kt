@@ -21,10 +21,7 @@ fun RegisterMedicationScreen(
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // ── Diálogo de éxito: se muestra solo cuando el ViewModel confirma isSuccess ──
     if (state.isSuccess) {
-        // Extraemos el nombre del medicamento del mensaje del ViewModel
-        // Formato del mensaje: ✅ Medicamento "Paracetamol" registrado correctamente
         val medicationName = state.successMessage
             ?.substringAfter("\"")
             ?.substringBefore("\"")
@@ -33,13 +30,12 @@ fun RegisterMedicationScreen(
         MedicationSuccessDialog(
             medicationName = medicationName,
             onDismiss = {
-                viewModel.resetState()       // limpia isSuccess en el ViewModel
-                onMedicationRegistered()     // navega fuera de la pantalla
+                viewModel.resetState()
+                onMedicationRegistered()
             }
         )
     }
 
-    // ── Snackbar para errores ──────────────────────────────────────────────────
     LaunchedEffect(state.error) {
         state.error?.let {
             snackbarHostState.showSnackbar(it)
@@ -57,25 +53,46 @@ fun RegisterMedicationScreen(
 
             else -> {
                 RegisterMedicationForm(
-                    onRegister = { name, dosage, form, instructions, notes, quantity, price, isActive, photoPath ->
-                        // Validaciones antes de llamar al ViewModel
+                    onRegister = {
+                            name,
+                            dosage,
+                            form,
+                            instructions,
+                            notes,
+                            quantity,
+                            price,
+                            isActive,
+                            photoPath,
+                            startDate,
+                            endDate ->
+
                         val quantityInt = quantity.toIntOrNull()
                         val priceDouble = price.toDoubleOrNull()
 
                         when {
-                            name.isBlank()      -> return@RegisterMedicationForm
-                            dosage.isBlank()    -> return@RegisterMedicationForm
-                            form.isBlank()      -> return@RegisterMedicationForm
-                            quantityInt == null -> return@RegisterMedicationForm
+                            name.isBlank() -> {
+                                // nombre vacío — no guarda
+                            }
+                            dosage.isBlank() -> {
+                                // dosis vacía — no guarda
+                            }
+                            form.isBlank() -> {
+                                // forma vacía — no guarda
+                            }
+                            quantityInt == null -> {
+                                // cantidad inválida — no guarda
+                            }
                             else -> viewModel.registerMedication(
                                 name         = name,
                                 dosage       = dosage,
                                 form         = form,
-                                instructions = instructions,
-                                notes        = notes,
+                                instructions = instructions.ifBlank { null },
+                                notes        = notes.ifBlank { null },
                                 quantity     = quantityInt,
                                 price        = priceDouble,
                                 isActive     = isActive,
+                                startDate    = startDate,
+                                endDate      = endDate,
                                 photoPath    = photoPath
                             )
                         }
