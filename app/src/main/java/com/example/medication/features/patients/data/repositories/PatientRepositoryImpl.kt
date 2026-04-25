@@ -3,6 +3,7 @@ package com.example.medication.features.patients.data.repositories
 import com.example.medication.features.patients.data.dataresources.remote.api.PatientsApi
 import com.example.medication.features.patients.data.dataresources.remote.mapper.toDomain
 import com.example.medication.features.patients.data.dataresources.remote.models.CreatePatientRequest
+import com.example.medication.features.patients.data.dataresources.remote.models.LinkAccountRequest
 import com.example.medication.features.patients.data.dataresources.remote.models.PatientDto
 import com.example.medication.features.patients.domain.entities.Patient
 import com.example.medication.features.patients.domain.repositories.PatientRepository
@@ -38,8 +39,7 @@ class PatientRepositoryImpl @Inject constructor(
     override suspend fun getPatientsByCaregiver(
         caregiverUserId: String
     ): List<Patient> {
-        return api.getPatientsByCaregiver(caregiverUserId)
-            .map { it.toDomain() }
+        return api.getPatientsByCaregiver(caregiverUserId).map { it.toDomain() }
     }
 
     override suspend fun getPatientById(id: String): Patient {
@@ -65,5 +65,17 @@ class PatientRepositoryImpl @Inject constructor(
 
     override suspend fun deletePatient(id: String) {
         api.deletePatient(id)
+    }
+
+    override suspend fun linkAccount(
+        token: String,
+        userId: String
+    ) {
+        api.linkAccount(
+            LinkAccountRequest(
+                token  = token,
+                userId = userId
+            )
+        )
     }
 }

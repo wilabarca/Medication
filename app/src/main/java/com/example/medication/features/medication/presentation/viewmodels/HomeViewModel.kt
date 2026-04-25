@@ -8,6 +8,7 @@ import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.domain.usecases.DeleteMedicationUseCase
 import com.example.medication.features.medication.domain.usecases.GetMedicationsUseCase
 import com.example.medication.features.medication.domain.usecases.UpdateMedicationUseCase
+import com.example.medication.features.patients.domain.usecases.LinkWithCaregiverUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// ── UI State ───────────────────────────────────────────────────────────────────
 data class HomeUiState(
     val medications: List<Medication> = emptyList(),
     val isLoading: Boolean = false,
@@ -27,6 +27,7 @@ class HomeViewModel @Inject constructor(
     private val getMedicationsUseCase: GetMedicationsUseCase,
     private val deleteMedicationUseCase: DeleteMedicationUseCase,
     private val updateMedicationUseCase: UpdateMedicationUseCase,
+    private val linkWithCaregiverUseCase: LinkWithCaregiverUseCase,
     private val jwtSessionManager: JwtSessionManager,
     private val deviceIdProvider: DeviceIdProvider
 ) : ViewModel() {
@@ -38,7 +39,6 @@ class HomeViewModel @Inject constructor(
         getMedications()
     }
 
-    // ── Obtener medicamentos ───────────────────────────────────────────────────
     fun getMedications() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
@@ -66,7 +66,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // ── Eliminar medicamento ───────────────────────────────────────────────────
     fun deleteMedication(id: String) {
         viewModelScope.launch {
             try {
@@ -80,7 +79,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // ── Actualizar medicamento ─────────────────────────────────────────────────
     fun updateMedication(
         id: String,
         name: String,
@@ -130,7 +128,29 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // ── Limpiar error ──────────────────────────────────────────────────────────
+    fun linkWithCaregiver(
+        token: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val userId = jwtSessionManager.getUserId()
+                if (userId.isNullOrBlank()) {
+                    onError("No se pudo obtener el usuario")
+                    return@launch
+                }
+                linkWithCaregiverUseCase(
+                    token  = token,
+                    userId = userId
+                )
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Error al vincular con el cuidador")
+            }
+        }
+    }
+
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
     }
