@@ -6,7 +6,7 @@ import javax.inject.Inject
 class LinkWithCaregiverUseCase @Inject constructor(
     private val repository: PatientRepository
 ) {
-    suspend operator fun invoke(token: String, userId: String) {
-        repository.linkAccount(token = token, userId = userId)
+    suspend operator fun invoke(token: String, userId: String): String {
+        return repository.linkAccount(token = token, userId = userId)
     }
 }

@@ -1,5 +1,6 @@
 package com.example.medication.features.medication.presentation.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medication.core.hardware.domain.DeviceIdProvider
@@ -18,10 +19,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val TAG = "HomeViewModel"
+
 data class HomeUiState(
     val medications: List<Medication> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val isLinked: Boolean = false
 )
 
 @HiltViewModel
@@ -39,28 +43,47 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        getMedications()
+        checkIfLinked()
     }
 
+    // ── Verifica si ya está vinculado al iniciar ───────────────────────────────
+    private fun checkIfLinked() {
+        viewModelScope.launch {
+            val linkedId = jwtSessionManager.getLinkedPatientId()
+            val alreadyLinked = !linkedId.isNullOrBlank()
+            Log.d(TAG, "checkIfLinked → linkedId=$linkedId, alreadyLinked=$alreadyLinked")
+            _uiState.value = _uiState.value.copy(isLinked = alreadyLinked)
+            if (alreadyLinked) getMedications()
+        }
+    }
+
+    // ── Obtener medicamentos ───────────────────────────────────────────────────
     fun getMedications() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val patientId = jwtSessionManager.getUserId()
+                val patientId = jwtSessionManager.getLinkedPatientId()
+                Log.d(TAG, "getMedications → patientId=$patientId")
+
                 if (patientId.isNullOrBlank()) {
+                    Log.w(TAG, "getMedications → sin patientId, abortando")
                     _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error     = "No se pudo obtener el usuario desde el token"
+                        medications = emptyList(),
+                        isLoading   = false,
+                        error       = null
                     )
                     return@launch
                 }
+
                 val medications = getMedicationsUseCase(patientId)
+                Log.d(TAG, "getMedications → total=${medications.size}")
                 _uiState.value = _uiState.value.copy(
                     medications = medications,
                     isLoading   = false,
                     error       = null
                 )
             } catch (e: Exception) {
+                Log.e(TAG, "getMedications → error", e)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     error     = e.message ?: "Error al obtener medicamentos"
@@ -69,11 +92,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // ── Eliminar + guardar en historial ────────────────────────────
+    // ── Eliminar + guardar en historial ────────────────────────────────────────
     fun deleteMedication(medication: Medication) {
         viewModelScope.launch {
             try {
-                // 1. guarda en historial local antes de eliminar
+                Log.d(TAG, "deleteMedication → id=${medication.id}")
                 saveToHistoryUseCase(
                     MedicationHistory(
                         id           = medication.id,
@@ -92,10 +115,10 @@ class HomeViewModel @Inject constructor(
                         deletedAt    = System.currentTimeMillis()
                     )
                 )
-                // 2. elimina del backend
                 deleteMedicationUseCase(medication.id)
                 getMedications()
             } catch (e: Exception) {
+                Log.e(TAG, "deleteMedication → error", e)
                 _uiState.value = _uiState.value.copy(
                     error = e.message ?: "Error al eliminar medicamento"
                 )
@@ -103,6 +126,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    // ── Actualizar medicamento ─────────────────────────────────────────────────
     fun updateMedication(
         id: String,
         name: String,
@@ -119,17 +143,18 @@ class HomeViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                val currentPatientId = jwtSessionManager.getUserId()
-                if (currentPatientId.isNullOrBlank()) {
-                    _uiState.value = _uiState.value.copy(
-                        error = "No se pudo obtener el usuario actual desde el token"
-                    )
+                val linkedPatientId = jwtSessionManager.getLinkedPatientId()
+                Log.d(TAG, "updateMedication → id=$id, linkedPatientId=$linkedPatientId")
+
+                if (linkedPatientId.isNullOrBlank()) {
+                    Log.w(TAG, "updateMedication → sin patientId vinculado")
+                    _uiState.value = _uiState.value.copy(error = "No hay paciente vinculado")
                     return@launch
                 }
                 val deviceId = deviceIdProvider.getDeviceId()
                 updateMedicationUseCase(
                     id           = id,
-                    patientId    = currentPatientId,
+                    patientId    = linkedPatientId,
                     name         = name,
                     dosage       = dosage,
                     form         = form,
@@ -145,6 +170,7 @@ class HomeViewModel @Inject constructor(
                 )
                 getMedications()
             } catch (e: Exception) {
+                Log.e(TAG, "updateMedication → error", e)
                 _uiState.value = _uiState.value.copy(
                     error = e.message ?: "Error al actualizar medicamento"
                 )
@@ -152,6 +178,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    // ── Vincular con cuidador mediante token ───────────────────────────────────
+    // El backend guarda el deviceId como linkedUserId del paciente.
+    // Causas comunes de error 400:
+    //   1. Token ya usado (isActive = false en BD)
+    //   2. Token expirado (> 30 min)
+    //   3. Paciente ya vinculado a otro deviceId distinto
+    // En todos los casos el repositorio ahora extrae el mensaje real del servidor.
     fun linkWithCaregiver(
         token: String,
         onSuccess: () -> Unit,
@@ -159,16 +192,37 @@ class HomeViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                val userId = jwtSessionManager.getUserId()
-                if (userId.isNullOrBlank()) {
-                    onError("No se pudo obtener el usuario")
-                    return@launch
-                }
-                linkWithCaregiverUseCase(token = token, userId = userId)
+                val deviceId = deviceIdProvider.getDeviceId()
+                Log.d(TAG, "linkWithCaregiver → token=$token, deviceId=$deviceId")
+
+                val patientId = linkWithCaregiverUseCase(
+                    token  = token,
+                    userId = deviceId
+                )
+                Log.d(TAG, "linkWithCaregiver → patientId recibido=$patientId")
+
+                jwtSessionManager.saveLinkedPatientId(patientId)
+                Log.d(TAG, "linkWithCaregiver → patientId guardado correctamente")
+
+                _uiState.value = _uiState.value.copy(isLinked = true)
+
+                getMedications()
+
                 onSuccess()
             } catch (e: Exception) {
+                // Ahora el mensaje viene directo del body del servidor (ej: "Token inválido o inactivo")
+                Log.e(TAG, "linkWithCaregiver → error al vincular: ${e.message}", e)
                 onError(e.message ?: "Error al vincular con el cuidador")
             }
+        }
+    }
+
+    // ── Desvincular ───────────────────────────────────────────────────────────
+    fun unlinkCaregiver() {
+        viewModelScope.launch {
+            Log.d(TAG, "unlinkCaregiver → desvinculando")
+            jwtSessionManager.saveLinkedPatientId("")
+            _uiState.value = HomeUiState()
         }
     }
 

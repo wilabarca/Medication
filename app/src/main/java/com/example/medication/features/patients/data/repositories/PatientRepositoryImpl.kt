@@ -7,6 +7,8 @@ import com.example.medication.features.patients.data.dataresources.remote.models
 import com.example.medication.features.patients.data.dataresources.remote.models.PatientDto
 import com.example.medication.features.patients.domain.entities.Patient
 import com.example.medication.features.patients.domain.repositories.PatientRepository
+import org.json.JSONObject
+import retrofit2.HttpException
 import javax.inject.Inject
 
 class PatientRepositoryImpl @Inject constructor(
@@ -48,7 +50,7 @@ class PatientRepositoryImpl @Inject constructor(
 
     override suspend fun updatePatient(patient: Patient): Patient {
         val response = api.updatePatient(
-            id = patient.id,
+            id      = patient.id,
             patient = PatientDto(
                 id              = patient.id,
                 caregiverUserId = patient.caregiverUserId,
@@ -70,12 +72,35 @@ class PatientRepositoryImpl @Inject constructor(
     override suspend fun linkAccount(
         token: String,
         userId: String
-    ) {
-        api.linkAccount(
-            LinkAccountRequest(
-                token  = token,
-                userId = userId
+    ): String {
+        return try {
+            val response = api.linkAccount(
+                LinkAccountRequest(
+                    token  = token,
+                    userId = userId
+                )
             )
-        )
+            response.patientId
+                ?: throw Exception("El servidor no devolvió el patientId")
+
+        } catch (e: HttpException) {
+            // ── Extrae el mensaje real del body del servidor ────────────────
+            val errorMessage = try {
+                val errorBody = e.response()?.errorBody()?.string()
+                if (!errorBody.isNullOrBlank()) {
+                    val json = JSONObject(errorBody)
+                    when {
+                        json.has("message") -> json.getString("message")
+                        json.has("error")   -> json.getString("error")
+                        else -> "Error del servidor (${e.code()})"
+                    }
+                } else {
+                    "Error del servidor (${e.code()})"
+                }
+            } catch (parseEx: Exception) {
+                "Error del servidor (${e.code()})"
+            }
+            throw Exception(errorMessage)
+        }
     }
 }

@@ -27,5 +27,5 @@ interface PatientRepository {
     suspend fun linkAccount(
         token: String,
         userId: String
-    )
+    ): String                              // ← retorna patientId
 }
