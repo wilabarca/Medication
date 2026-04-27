@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medication.core.hardware.domain.DeviceIdProvider
 import com.example.medication.core.session.JwtSessionManager
+import com.example.medication.features.history.domain.entities.MedicationHistory
+import com.example.medication.features.history.domain.usecases.SaveToHistoryUseCase
 import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.domain.usecases.DeleteMedicationUseCase
 import com.example.medication.features.medication.domain.usecases.GetMedicationsUseCase
@@ -28,6 +30,7 @@ class HomeViewModel @Inject constructor(
     private val deleteMedicationUseCase: DeleteMedicationUseCase,
     private val updateMedicationUseCase: UpdateMedicationUseCase,
     private val linkWithCaregiverUseCase: LinkWithCaregiverUseCase,
+    private val saveToHistoryUseCase: SaveToHistoryUseCase,
     private val jwtSessionManager: JwtSessionManager,
     private val deviceIdProvider: DeviceIdProvider
 ) : ViewModel() {
@@ -47,7 +50,7 @@ class HomeViewModel @Inject constructor(
                 if (patientId.isNullOrBlank()) {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = "No se pudo obtener el usuario desde el token"
+                        error     = "No se pudo obtener el usuario desde el token"
                     )
                     return@launch
                 }
@@ -66,10 +69,31 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun deleteMedication(id: String) {
+    // ── Eliminar + guardar en historial ────────────────────────────
+    fun deleteMedication(medication: Medication) {
         viewModelScope.launch {
             try {
-                deleteMedicationUseCase(id)
+                // 1. guarda en historial local antes de eliminar
+                saveToHistoryUseCase(
+                    MedicationHistory(
+                        id           = medication.id,
+                        patientId    = medication.patientId,
+                        name         = medication.name,
+                        dosage       = medication.dosage,
+                        form         = medication.form,
+                        instructions = medication.instructions,
+                        notes        = medication.notes,
+                        quantity     = medication.quantity,
+                        price        = medication.price,
+                        isActive     = medication.isActive,
+                        startDate    = medication.startDate,
+                        endDate      = medication.endDate,
+                        photoPath    = medication.photoPath,
+                        deletedAt    = System.currentTimeMillis()
+                    )
+                )
+                // 2. elimina del backend
+                deleteMedicationUseCase(medication.id)
                 getMedications()
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -90,7 +114,7 @@ class HomeViewModel @Inject constructor(
         price: Double?,
         isActive: Boolean,
         startDate: String? = null,
-        endDate: String? = null,
+        endDate: String?   = null,
         photoPath: String? = null
     ) {
         viewModelScope.launch {
@@ -140,10 +164,7 @@ class HomeViewModel @Inject constructor(
                     onError("No se pudo obtener el usuario")
                     return@launch
                 }
-                linkWithCaregiverUseCase(
-                    token  = token,
-                    userId = userId
-                )
+                linkWithCaregiverUseCase(token = token, userId = userId)
                 onSuccess()
             } catch (e: Exception) {
                 onError(e.message ?: "Error al vincular con el cuidador")

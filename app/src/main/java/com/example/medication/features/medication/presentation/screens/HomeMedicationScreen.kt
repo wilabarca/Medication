@@ -8,9 +8,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +25,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.medication.features.favorites.presentation.viewmodels.FavoritesViewModel
 import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.presentation.components.MedicationCard
 import com.example.medication.features.medication.presentation.viewmodels.HomeViewModel
@@ -35,20 +34,17 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeMedicationScreen(
     onNavigateToRegister: () -> Unit = {},
-    onNavigateToSearch: () -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {},
-    onNavigateToAlarm: () -> Unit = {},
+    onNavigateToSearch:   () -> Unit = {},
+    onNavigateToHistory:  () -> Unit = {},  // ← reemplaza favoritos
+    onNavigateToAlarm:    () -> Unit = {},
     onNavigateToEdit: (Medication) -> Unit = {},
-    viewModel: HomeViewModel = hiltViewModel(),
-    favoritesViewModel: FavoritesViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state             by viewModel.uiState.collectAsStateWithLifecycle()
-    val favoritesMap      by favoritesViewModel.favoritesMap.collectAsStateWithLifecycle()
     val lifecycleOwner    = LocalLifecycleOwner.current
     val scope             = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // ── Estado del modal ───────────────────────────────────────────
     var showLinkDialog by remember { mutableStateOf(false) }
     var linkToken      by remember { mutableStateOf("") }
     var isLinking      by remember { mutableStateOf(false) }
@@ -73,17 +69,9 @@ fun HomeMedicationScreen(
             shape = RoundedCornerShape(20.dp),
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Link,
-                        contentDescription = null,
-                        tint = Color(0xFF6A1B9A)
-                    )
+                    Icon(Icons.Default.Link, contentDescription = null, tint = Color(0xFF6A1B9A))
                     Spacer(Modifier.width(8.dp))
-                    Text(
-                        "Vincularme con cuidador",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
+                    Text("Vincularme con cuidador", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             },
             text = {
@@ -91,7 +79,7 @@ fun HomeMedicationScreen(
                     Text(
                         "Ingresa el código que te compartió tu cuidador:",
                         fontSize = 13.sp,
-                        color = Color(0xFF607D8B)
+                        color    = Color(0xFF607D8B)
                     )
                     Spacer(Modifier.height(16.dp))
                     OutlinedTextField(
@@ -99,15 +87,11 @@ fun HomeMedicationScreen(
                         onValueChange = { linkToken = it.uppercase().take(8) },
                         label         = { Text("Código (ej. CF1CAC2A)") },
                         leadingIcon   = {
-                            Icon(
-                                Icons.Default.Link,
-                                contentDescription = null,
-                                tint = Color(0xFF6A1B9A)
-                            )
+                            Icon(Icons.Default.Link, contentDescription = null, tint = Color(0xFF6A1B9A))
                         },
                         singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
+                        shape      = RoundedCornerShape(12.dp),
+                        colors     = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF6A1B9A),
                             focusedLabelColor  = Color(0xFF6A1B9A)
                         ),
@@ -117,7 +101,7 @@ fun HomeMedicationScreen(
                     Text(
                         "El código tiene 8 caracteres y lo genera tu cuidador.",
                         fontSize = 11.sp,
-                        color = Color(0xFF90A4AE)
+                        color    = Color(0xFF90A4AE)
                     )
                 }
             },
@@ -132,7 +116,7 @@ fun HomeMedicationScreen(
                         }
                         isLinking = true
                         viewModel.linkWithCaregiver(
-                            token = linkToken,
+                            token     = linkToken,
                             onSuccess = {
                                 isLinking      = false
                                 showLinkDialog = false
@@ -156,8 +140,8 @@ fun HomeMedicationScreen(
                         )
                     },
                     enabled = !isLinking,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A)),
-                    shape  = RoundedCornerShape(10.dp)
+                    colors  = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A)),
+                    shape   = RoundedCornerShape(10.dp)
                 ) {
                     if (isLinking) {
                         CircularProgressIndicator(
@@ -171,14 +155,12 @@ fun HomeMedicationScreen(
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        if (!isLinking) {
-                            showLinkDialog = false
-                            linkToken = ""
-                        }
+                TextButton(onClick = {
+                    if (!isLinking) {
+                        showLinkDialog = false
+                        linkToken = ""
                     }
-                ) {
+                }) {
                     Text("Cancelar", color = Color(0xFF607D8B))
                 }
             }
@@ -191,7 +173,6 @@ fun HomeMedicationScreen(
             TopAppBar(
                 title = { Text("Mis Medicamentos") },
                 actions = {
-                    // ── Icono de vinculación ───────────────────────
                     IconButton(onClick = { showLinkDialog = true }) {
                         Icon(
                             Icons.Default.Link,
@@ -199,8 +180,8 @@ fun HomeMedicationScreen(
                             tint = Color(0xFF6A1B9A)
                         )
                     }
-                    IconButton(onClick = onNavigateToFavorites) {
-                        Icon(Icons.Default.Star, contentDescription = "Favoritos")
+                    IconButton(onClick = onNavigateToHistory) {
+                        Icon(Icons.Default.History, contentDescription = "Historial")
                     }
                     IconButton(onClick = onNavigateToSearch) {
                         Icon(Icons.Default.Search, contentDescription = "Buscar")
@@ -270,17 +251,12 @@ fun HomeMedicationScreen(
                             items = state.medications,
                             key   = { it.id }
                         ) { medication ->
-                            LaunchedEffect(medication.id) {
-                                favoritesViewModel.checkIsFavorite(medication.id)
-                            }
                             MedicationCard(
                                 medication       = medication,
-                                isFavorite       = favoritesMap[medication.id] ?: false,
-                                onToggleFavorite = {
-                                    favoritesViewModel.toggleFavorite(medication)
-                                },
-                                onDelete = { id -> viewModel.deleteMedication(id) },
-                                onEdit   = { med -> onNavigateToEdit(med) }
+                                isFavorite       = false,
+                                onToggleFavorite = {},
+                                onDelete         = { viewModel.deleteMedication(medication) },
+                                onEdit           = { onNavigateToEdit(medication) }
                             )
                         }
                     }
