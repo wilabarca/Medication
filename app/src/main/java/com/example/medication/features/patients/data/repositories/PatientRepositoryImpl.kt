@@ -27,14 +27,15 @@ class PatientRepositoryImpl @Inject constructor(
         val response = api.createPatient(
             CreatePatientRequest(
                 caregiverUserId = caregiverUserId,
-                linkedUserId    = linkedUserId,
-                name            = name,
-                birthDate       = birthDate,
-                relationship    = relationship,
-                notes           = notes,
-                isActive        = isActive
+                linkedUserId = linkedUserId,
+                name = name,
+                birthDate = birthDate,
+                relationship = relationship,
+                notes = notes,
+                isActive = isActive
             )
         )
+
         return response.toDomain()
     }
 
@@ -52,16 +53,17 @@ class PatientRepositoryImpl @Inject constructor(
         val response = api.updatePatient(
             id      = patient.id,
             patient = PatientDto(
-                id              = patient.id,
+                id = patient.id,
                 caregiverUserId = patient.caregiverUserId,
-                linkedUserId    = patient.linkedUserId,
-                name            = patient.name,
-                birthDate       = patient.birthDate,
-                relationship    = patient.relationship,
-                notes           = patient.notes,
-                isActive        = patient.isActive
+                linkedUserId = patient.linkedUserId,
+                name = patient.name,
+                birthDate = patient.birthDate,
+                relationship = patient.relationship,
+                notes = patient.notes,
+                isActive = patient.isActive
             )
         )
+
         return response.toDomain()
     }
 

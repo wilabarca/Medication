@@ -13,12 +13,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.medication.features.patients.domain.entities.Patient
+import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
 
 @Composable
 fun PatientCard(
     patient: Patient,
-    onClick: () -> Unit
-) {
+    onClick: () -> Unit,
+    onGenerateLinkToken: () -> Unit
+)  {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -52,6 +60,20 @@ fun PatientCard(
                 text = if (patient.isActive) "Activo" else "Inactivo",
                 style = MaterialTheme.typography.bodySmall
             )
+
+            OutlinedButton(
+                onClick = onGenerateLinkToken
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Link,
+                    contentDescription = null
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text("Vincular")
+            }
+
         }
     }
 }
