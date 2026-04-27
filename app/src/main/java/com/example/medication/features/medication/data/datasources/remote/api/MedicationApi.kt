@@ -11,11 +11,14 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface MedicationApi {
 
     @GET("medications")
-    suspend fun getMedications(): List<MedicationDto>
+    suspend fun getMedications(
+        @Query("patientId") patientId: String  // ← agrega esto
+    ): List<MedicationDto>
 
     @GET("medications/{id}")
     suspend fun getMedicationById(@Path("id") id: String): MedicationDto

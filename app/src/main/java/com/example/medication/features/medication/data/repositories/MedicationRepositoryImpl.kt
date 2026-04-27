@@ -17,8 +17,9 @@ class MedicationRepositoryImpl @Inject constructor(
     private val dao: MedicationDao
 ) : MedicationRepository {
 
-    override suspend fun getMedications(): List<Medication> {
-        val remoteMedications = api.getMedications()
+    // ← único método que cambió
+    override suspend fun getMedications(patientId: String): List<Medication> {
+        val remoteMedications = api.getMedications(patientId)
 
         remoteMedications.forEach { dto ->
             val id = dto.id ?: return@forEach
@@ -40,7 +41,7 @@ class MedicationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun createMedication(
-        patientId: String,        // ← userId → patientId
+        patientId: String,
         name: String,
         dosage: String,
         form: String,
@@ -49,8 +50,8 @@ class MedicationRepositoryImpl @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean,
-        startDate: String?,       // ← nuevo
-        endDate: String?,         // ← nuevo
+        startDate: String?,
+        endDate: String?,
         photoPath: String?,
         deviceId: String
     ) {
@@ -70,15 +71,13 @@ class MedicationRepositoryImpl @Inject constructor(
         )
 
         val created = api.createMedication(request).data
-
         dao.insertMedication(created.toEntity(photoPath = photoPath))
-
         Log.d("PHOTO_DEBUG", "createMedication insertó photoPath: $photoPath para id: ${created.id}")
     }
 
     override suspend fun updateMedication(
         id: String,
-        patientId: String,        // ← userId → patientId
+        patientId: String,
         name: String,
         dosage: String,
         form: String,
@@ -87,8 +86,8 @@ class MedicationRepositoryImpl @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean,
-        startDate: String?,       // ← nuevo
-        endDate: String?,         // ← nuevo
+        startDate: String?,
+        endDate: String?,
         photoPath: String?,
         deviceId: String
     ): Medication {
@@ -128,7 +127,6 @@ class MedicationRepositoryImpl @Inject constructor(
         )
 
         Log.d("PHOTO_DEBUG", "updateMedication guardó photoPath: $photoPath para id: $id")
-
         return remote.copy(photoPath = photoPath)
     }
 

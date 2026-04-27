@@ -1,48 +1,178 @@
-fun updateMedication(
-    id: String,
-    name: String,
-    dosage: String,
-    form: String,
-    instructions: String?,
-    notes: String?,
-    quantity: Int,
-    price: Double?,
-    isActive: Boolean,
-    startDate: String? = null,  // ← nuevo
-    endDate: String? = null,    // ← nuevo
-    photoPath: String? = null
-) {
-    viewModelScope.launch {
-        try {
-            val currentPatientId = jwtSessionManager.getUserId()
-            if (currentPatientId.isNullOrBlank()) {
+package com.example.medication.features.medication.presentation.viewmodels
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.medication.core.hardware.domain.DeviceIdProvider
+import com.example.medication.core.session.JwtSessionManager
+import com.example.medication.features.history.domain.entities.MedicationHistory
+import com.example.medication.features.history.domain.usecases.SaveToHistoryUseCase
+import com.example.medication.features.medication.domain.entities.Medication
+import com.example.medication.features.medication.domain.usecases.DeleteMedicationUseCase
+import com.example.medication.features.medication.domain.usecases.GetMedicationsUseCase
+import com.example.medication.features.medication.domain.usecases.UpdateMedicationUseCase
+import com.example.medication.features.patients.domain.usecases.LinkWithCaregiverUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+data class HomeUiState(
+    val medications: List<Medication> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
+
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val getMedicationsUseCase: GetMedicationsUseCase,
+    private val deleteMedicationUseCase: DeleteMedicationUseCase,
+    private val updateMedicationUseCase: UpdateMedicationUseCase,
+    private val linkWithCaregiverUseCase: LinkWithCaregiverUseCase,
+    private val saveToHistoryUseCase: SaveToHistoryUseCase,
+    private val jwtSessionManager: JwtSessionManager,
+    private val deviceIdProvider: DeviceIdProvider
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    init {
+        getMedications()
+    }
+
+    fun getMedications() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            try {
+                val patientId = jwtSessionManager.getUserId()
+                if (patientId.isNullOrBlank()) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error     = "No se pudo obtener el usuario desde el token"
+                    )
+                    return@launch
+                }
+                val medications = getMedicationsUseCase(patientId)
                 _uiState.value = _uiState.value.copy(
-                    error = "No se pudo obtener el usuario actual desde el token"
+                    medications = medications,
+                    isLoading   = false,
+                    error       = null
                 )
-                return@launch
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error     = e.message ?: "Error al obtener medicamentos"
+                )
             }
-            val deviceId = deviceIdProvider.getDeviceId()
-            updateMedicationUseCase(
-                id           = id,
-                patientId    = currentPatientId,
-                name         = name,
-                dosage       = dosage,
-                form         = form,
-                instructions = instructions,
-                notes        = notes,
-                quantity     = quantity,
-                price        = price,
-                isActive     = isActive,
-                startDate    = startDate,
-                endDate      = endDate,
-                photoPath    = photoPath,
-                deviceId     = deviceId
-            )
-            getMedications()
-        } catch (e: Exception) {
-            _uiState.value = _uiState.value.copy(
-                error = e.message ?: "Error al actualizar medicamento"
-            )
         }
+    }
+
+    // ── Eliminar + guardar en historial ────────────────────────────
+    fun deleteMedication(medication: Medication) {
+        viewModelScope.launch {
+            try {
+                // 1. guarda en historial local antes de eliminar
+                saveToHistoryUseCase(
+                    MedicationHistory(
+                        id           = medication.id,
+                        patientId    = medication.patientId,
+                        name         = medication.name,
+                        dosage       = medication.dosage,
+                        form         = medication.form,
+                        instructions = medication.instructions,
+                        notes        = medication.notes,
+                        quantity     = medication.quantity,
+                        price        = medication.price,
+                        isActive     = medication.isActive,
+                        startDate    = medication.startDate,
+                        endDate      = medication.endDate,
+                        photoPath    = medication.photoPath,
+                        deletedAt    = System.currentTimeMillis()
+                    )
+                )
+                // 2. elimina del backend
+                deleteMedicationUseCase(medication.id)
+                getMedications()
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = e.message ?: "Error al eliminar medicamento"
+                )
+            }
+        }
+    }
+
+    fun updateMedication(
+        id: String,
+        name: String,
+        dosage: String,
+        form: String,
+        instructions: String?,
+        notes: String?,
+        quantity: Int,
+        price: Double?,
+        isActive: Boolean,
+        startDate: String? = null,
+        endDate: String?   = null,
+        photoPath: String? = null
+    ) {
+        viewModelScope.launch {
+            try {
+                val currentPatientId = jwtSessionManager.getUserId()
+                if (currentPatientId.isNullOrBlank()) {
+                    _uiState.value = _uiState.value.copy(
+                        error = "No se pudo obtener el usuario actual desde el token"
+                    )
+                    return@launch
+                }
+                val deviceId = deviceIdProvider.getDeviceId()
+                updateMedicationUseCase(
+                    id           = id,
+                    patientId    = currentPatientId,
+                    name         = name,
+                    dosage       = dosage,
+                    form         = form,
+                    instructions = instructions,
+                    notes        = notes,
+                    quantity     = quantity,
+                    price        = price,
+                    isActive     = isActive,
+                    startDate    = startDate,
+                    endDate      = endDate,
+                    photoPath    = photoPath,
+                    deviceId     = deviceId
+                )
+                getMedications()
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = e.message ?: "Error al actualizar medicamento"
+                )
+            }
+        }
+    }
+
+    fun linkWithCaregiver(
+        token: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val userId = jwtSessionManager.getUserId()
+                if (userId.isNullOrBlank()) {
+                    onError("No se pudo obtener el usuario")
+                    return@launch
+                }
+                linkWithCaregiverUseCase(token = token, userId = userId)
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Error al vincular con el cuidador")
+            }
+        }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 }

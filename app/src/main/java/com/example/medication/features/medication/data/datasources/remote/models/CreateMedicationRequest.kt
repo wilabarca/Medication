@@ -1,16 +1,18 @@
 package com.example.medication.features.medication.data.datasources.remote.models
 
+import com.google.gson.annotations.SerializedName
+
 data class CreateMedicationRequest(
-    val patientId: String,     // ← userId → patientId
-    val name: String,
-    val dosage: String,
-    val form: String,
-    val instructions: String? = null,
-    val notes: String? = null,
-    val quantity: Int,
-    val price: Double? = null,
-    val isActive: Boolean = true,
-    val startDate: String? = null,  // ← nuevo
-    val endDate: String? = null,    // ← nuevo
-    val deviceId: String
+    @SerializedName("patientId")    val patientId: String,
+    @SerializedName("name")         val name: String,
+    @SerializedName("dosage")       val dosage: String,
+    @SerializedName("form")         val form: String,
+    @SerializedName("instructions") val instructions: String? = null,
+    @SerializedName("notes")        val notes: String? = null,
+    @SerializedName("quantity")     val quantity: Int,
+    @SerializedName("price")        val price: Double? = null,
+    @SerializedName("isActive")     val isActive: Boolean = true,
+    @SerializedName("startDate")    val startDate: String? = null,
+    @SerializedName("endDate")      val endDate: String? = null,
+    @SerializedName("deviceId")     val deviceId: String
 )

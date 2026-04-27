@@ -1,6 +1,7 @@
 package com.example.medication.core.di
 
 import com.example.medication.features.auth.data.dataresources.remote.api.AuthApi
+import com.example.medication.features.patients.data.dataresources.remote.api.PatientsApi
 import com.example.medication.features.searchmedication.data.datasources.remote.api.MedicationApiService
 import dagger.Module
 import dagger.Provides
@@ -19,7 +20,7 @@ object NetWorkModule {
     @ApiMedicationRetrofit
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://44.222.56.219:3000/")  // ✅ EC2 pública
+            .baseUrl("http://44.222.56.219:3000/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -35,4 +36,10 @@ object NetWorkModule {
     fun provideMedicineApiService(
         @ApiMedicationRetrofit retrofit: Retrofit
     ): MedicationApiService = retrofit.create(MedicationApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun providePatientsApi(
+        @ApiMedicationRetrofit retrofit: Retrofit
+    ): PatientsApi = retrofit.create(PatientsApi::class.java)  // ← solo este quedó
 }

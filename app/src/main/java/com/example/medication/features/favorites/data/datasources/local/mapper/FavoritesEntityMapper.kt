@@ -4,23 +4,23 @@ import com.example.medication.core.database.entities.FavoriteEntity
 import com.example.medication.features.medication.domain.entities.Medication
 
 fun FavoriteEntity.toDomain() = Medication(
-    id = id,
-    userId = "",                  // favoritos son locales
-    name = name,
-    dosage = description,         // reuso temporal del campo viejo
-    form = "No especificado",     // porque FavoriteEntity viejo no lo tiene
+    id          = id,
+    patientId   = "",               // favoritos son locales, no tienen patientId real
+    name        = name,
+    dosage      = description,      // reuso temporal del campo viejo
+    form        = "No especificado",
     instructions = null,
-    notes = null,
-    quantity = quantity,
-    price = price,
-    isActive = true,
-    photoPath = null
+    notes       = null,
+    quantity    = quantity,
+    price       = price,
+    isActive    = true,
+    photoPath   = null
 )
 
 fun Medication.toEntity() = FavoriteEntity(
-    id = id,
-    name = name,
-    description = dosage,         // reuso temporal del campo viejo
-    quantity = quantity,
-    price = price ?: 0.0
+    id          = id,
+    name        = name,
+    description = dosage,           // reuso temporal del campo viejo
+    quantity    = quantity,
+    price       = price ?: 0.0
 )

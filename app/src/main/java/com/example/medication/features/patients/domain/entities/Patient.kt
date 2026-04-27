@@ -1,5 +1,7 @@
 package com.example.medication.features.patients.domain.entities
 
+import com.example.medication.features.medication.domain.entities.Medication
+
 data class Patient(
     val id: String,
     val caregiverUserId: String,
@@ -8,5 +10,6 @@ data class Patient(
     val birthDate: String?,
     val relationship: String?,
     val notes: String?,
-    val isActive: Boolean
+    val isActive: Boolean,
+    val medications: List<Medication> = emptyList()  // ← nuevo, default vacío
 )

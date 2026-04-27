@@ -25,23 +25,19 @@ fun LoginScreen(
     onRegistrar: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
-    var usuario by rememberSaveable { mutableStateOf("") }
+    var usuario   by rememberSaveable { mutableStateOf("") }
     var contrasena by rememberSaveable { mutableStateOf("") }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState.loginSuccess, uiState.loggedUser) {
         val loggedUser = uiState.loggedUser
-
         if (uiState.loginSuccess && loggedUser != null) {
-            val role = loggedUser.role
-
             viewModel.consumeLoginSuccess()
             viewModel.clearLoggedUser()
-
-            when (role) {
+            when (loggedUser.role) {
                 "caregiver" -> onCaregiverLoginSuccess()
-                "patient" -> onPatientLoginSuccess()
+                "patient"   -> onPatientLoginSuccess()
             }
         }
     }
@@ -61,9 +57,9 @@ fun LoginScreen(
         contentAlignment = Alignment.Center
     ) {
         LoginForm(
-            usuario = usuario,
-            contrasena = contrasena,
-            isLoading = uiState.isLoading,
+            usuario      = usuario,
+            contrasena   = contrasena,
+            isLoading    = uiState.isLoading,
             errorMessage = uiState.errorMessage,
             onUsuarioChange = {
                 usuario = it
@@ -73,7 +69,7 @@ fun LoginScreen(
                 contrasena = it
                 if (uiState.errorMessage != null) viewModel.clearError()
             },
-            onIngresar = { viewModel.login(usuario, contrasena) },
+            onIngresar  = { viewModel.login(usuario, contrasena) },
             onRegistrar = onRegistrar
         )
     }

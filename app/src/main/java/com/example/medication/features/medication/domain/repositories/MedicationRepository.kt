@@ -4,12 +4,12 @@ import com.example.medication.features.medication.domain.entities.Medication
 
 interface MedicationRepository {
 
-    suspend fun getMedications(): List<Medication>
+    suspend fun getMedications(patientId: String): List<Medication>  // ← agrega patientId
 
     suspend fun getMedicationById(id: String): Medication
 
     suspend fun createMedication(
-        patientId: String,        // ← userId → patientId
+        patientId: String,
         name: String,
         dosage: String,
         form: String,
@@ -18,15 +18,15 @@ interface MedicationRepository {
         quantity: Int,
         price: Double?,
         isActive: Boolean,
-        startDate: String? = null,  // ← nuevo
-        endDate: String? = null,    // ← nuevo
+        startDate: String? = null,
+        endDate: String? = null,
         photoPath: String?,
         deviceId: String
     )
 
     suspend fun updateMedication(
         id: String,
-        patientId: String,        // ← userId → patientId
+        patientId: String,
         name: String,
         dosage: String,
         form: String,
@@ -35,8 +35,8 @@ interface MedicationRepository {
         quantity: Int,
         price: Double?,
         isActive: Boolean,
-        startDate: String? = null,  // ← nuevo
-        endDate: String? = null,    // ← nuevo
+        startDate: String? = null,
+        endDate: String? = null,
         photoPath: String?,
         deviceId: String
     ): Medication

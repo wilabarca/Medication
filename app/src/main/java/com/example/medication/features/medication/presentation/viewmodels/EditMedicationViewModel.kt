@@ -39,22 +39,23 @@ class EditMedicationViewModel @Inject constructor(
         quantity: Int,
         price: Double?,
         isActive: Boolean = true,
+        startDate: String? = null,
+        endDate: String? = null,
         photoPath: String? = null
     ) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
                 isSuccess = false,
-                error = null
+                error     = null
             )
 
             try {
-                val currentUserId = jwtSessionManager.getUserId()
+                val currentPatientId = jwtSessionManager.getUserId()
 
-                if (currentUserId.isNullOrBlank()) {
+                if (currentPatientId.isNullOrBlank()) {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        isSuccess = false,
                         error = "No se pudo obtener el usuario actual desde el token"
                     )
                     return@launch
@@ -63,30 +64,31 @@ class EditMedicationViewModel @Inject constructor(
                 val deviceId = deviceIdProvider.getDeviceId()
 
                 updateMedicationUseCase(
-                    id = id,
-                    userId = currentUserId,
-                    name = name,
-                    dosage = dosage,
-                    form = form,
+                    id           = id,
+                    patientId    = currentPatientId,   // ← corregido de userId
+                    name         = name,
+                    dosage       = dosage,
+                    form         = form,
                     instructions = instructions,
-                    notes = notes,
-                    quantity = quantity,
-                    price = price,
-                    isActive = isActive,
-                    photoPath = photoPath,
-                    deviceId = deviceId
+                    notes        = notes,
+                    quantity     = quantity,
+                    price        = price,
+                    isActive     = isActive,
+                    startDate    = startDate,
+                    endDate      = endDate,
+                    photoPath    = photoPath,
+                    deviceId     = deviceId
                 )
 
                 _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    isSuccess = true,
+                    isLoading      = false,
+                    isSuccess      = true,
                     successMessage = "✅ Medicamento \"$name\" actualizado correctamente"
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    isSuccess = false,
-                    error = "❌ Error al actualizar: ${e.message ?: "Error desconocido"}"
+                    error     = "❌ Error al actualizar: ${e.message ?: "Error desconocido"}"
                 )
             }
         }

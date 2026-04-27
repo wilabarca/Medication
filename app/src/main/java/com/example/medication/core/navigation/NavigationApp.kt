@@ -7,13 +7,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.medication.features.auth.presentation.screens.LoginScreen
 import com.example.medication.features.auth.presentation.screens.RegisterScreen
-import com.example.medication.features.favorites.presentation.screens.FavoritesScreen
+import com.example.medication.features.caregiver.presentation.screens.CaregiverHomeScreen
+import com.example.medication.features.history.presentation.screens.HistoryScreen
 import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.presentation.screens.AlarmScreens
 import com.example.medication.features.medication.presentation.screens.EditMedicationScreen
 import com.example.medication.features.medication.presentation.screens.HomeMedicationScreen
 import com.example.medication.features.medication.presentation.screens.RegisterAlarmScreen
 import com.example.medication.features.medication.presentation.screens.RegisterMedicationScreen
+import com.example.medication.features.patients.domain.entities.Patient
+import com.example.medication.features.patients.presentation.screens.CreatePatientScreen
+import com.example.medication.features.patients.presentation.screens.PatientsListScreen
 import com.example.medication.features.searchmedication.presentation.screens.SearchMedicinesScreen
 import com.google.gson.Gson
 
@@ -23,24 +27,24 @@ fun NavigationApp() {
     val gson = Gson()
 
     NavHost(
-        navController = navController,
+        navController    = navController,
         startDestination = "Login"
     ) {
+
+        // ── Auth ───────────────────────────────────────────────────
         composable("Login") {
             LoginScreen(
                 onCaregiverLoginSuccess = {
-                    navController.navigate("Home") {
+                    navController.navigate("CaregiverHome") {
                         popUpTo("Login") { inclusive = true }
                     }
                 },
                 onPatientLoginSuccess = {
-                    navController.navigate("Home") {
+                    navController.navigate("PatientHome") {
                         popUpTo("Login") { inclusive = true }
                     }
                 },
-                onRegistrar = {
-                    navController.navigate("Register")
-                }
+                onRegistrar = { navController.navigate("Register") }
             )
         }
 
@@ -54,19 +58,52 @@ fun NavigationApp() {
             )
         }
 
-        composable("Home") {
+        // ── Home Paciente ──────────────────────────────────────────
+        composable("PatientHome") {
             HomeMedicationScreen(
                 onNavigateToRegister = { navController.navigate("RegisterMedication") },
-                onNavigateToSearch = { navController.navigate("SearchMedicines") },
-                onNavigateToFavorites = { navController.navigate("Favorites") },
-                onNavigateToAlarm = { navController.navigate("Alarms") },
-                onNavigateToEdit = { medication ->
+                onNavigateToSearch   = { navController.navigate("SearchMedicines") },
+                onNavigateToHistory  = { navController.navigate("History") },
+                onNavigateToAlarm    = { navController.navigate("Alarms") },
+                onNavigateToEdit     = { medication ->
                     val json = Uri.encode(gson.toJson(medication))
                     navController.navigate("EditMedication/$json")
                 }
             )
         }
 
+        // ── Home Cuidador ──────────────────────────────────────────
+        composable("CaregiverHome") {
+            CaregiverHomeScreen(
+                onNavigateToCreatePatient = { navController.navigate("CreatePatient") },
+                onNavigateToPatientDetail = { patient ->
+                    val json = Uri.encode(gson.toJson(patient))
+                    navController.navigate("PatientDetail/$json")
+                }
+            )
+        }
+
+        composable("PatientDetail/{patient}") { backStackEntry ->
+            val json    = backStackEntry.arguments?.getString("patient") ?: return@composable
+            val patient = gson.fromJson(json, Patient::class.java)
+            PatientsListScreen(
+                caregiverUserId   = patient.caregiverUserId,
+                onCreatePatient   = { navController.navigate("CreatePatient") },
+                onPatientSelected = { selected ->
+                    val selectedJson = Uri.encode(gson.toJson(selected))
+                    navController.navigate("PatientDetail/$selectedJson")
+                }
+            )
+        }
+
+        composable("CreatePatient") {
+            CreatePatientScreen(
+                onBack    = { navController.popBackStack() },
+                onCreated = { navController.popBackStack() }
+            )
+        }
+
+        // ── Medicamentos ───────────────────────────────────────────
         composable("RegisterMedication") {
             RegisterMedicationScreen(
                 onMedicationRegistered = { navController.popBackStack() }
@@ -74,38 +111,37 @@ fun NavigationApp() {
         }
 
         composable("EditMedication/{medication}") { backStackEntry ->
-            val json = backStackEntry.arguments?.getString("medication") ?: return@composable
+            val json       = backStackEntry.arguments?.getString("medication") ?: return@composable
             val medication = gson.fromJson(json, Medication::class.java)
-
             EditMedicationScreen(
                 medication = medication,
-                onBack = { navController.popBackStack() },
-                onUpdated = { navController.popBackStack() }
+                onBack     = { navController.popBackStack() },
+                onUpdated  = { navController.popBackStack() }
             )
         }
 
+        // ── Historial ──────────────────────────────────────────────
+        composable("History") {
+            HistoryScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // ── Otras pantallas ────────────────────────────────────────
         composable("SearchMedicines") {
-            SearchMedicinesScreen(
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable("Favorites") {
-            FavoritesScreen(
-                onBack = { navController.popBackStack() }
-            )
+            SearchMedicinesScreen(onBack = { navController.popBackStack() })
         }
 
         composable("Alarms") {
             AlarmScreens(
-                onBack = { navController.popBackStack() },
+                onBack     = { navController.popBackStack() },
                 onAddAlarm = { navController.navigate("RegisterAlarm") }
             )
         }
 
         composable("RegisterAlarm") {
             RegisterAlarmScreen(
-                onBack = { navController.popBackStack() },
+                onBack       = { navController.popBackStack() },
                 onAlarmSaved = { navController.popBackStack() }
             )
         }
