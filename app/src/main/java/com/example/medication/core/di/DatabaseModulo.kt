@@ -4,9 +4,10 @@ import android.content.Context
 import androidx.room.Room
 import com.example.medication.core.database.AppDatabase
 import com.example.medication.core.database.dao.FavoriteDao
-import com.example.medication.core.database.dao.MedicationDao
-import com.example.medication.core.database.dao.SearchMedicineDao
 import com.example.medication.core.database.dao.MedicationAlarmDao
+import com.example.medication.core.database.dao.MedicationDao
+import com.example.medication.core.database.dao.MedicationHistoryDao
+import com.example.medication.core.database.dao.SearchMedicineDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -46,5 +47,10 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideMedicationAlarmDao(db: AppDatabase): MedicationAlarmDao = db.medicationAlarmDao()  // ✅
+    fun provideMedicationAlarmDao(db: AppDatabase): MedicationAlarmDao = db.medicationAlarmDao()
+
+    @Provides
+    @Singleton
+    fun provideMedicationHistoryDao(db: AppDatabase): MedicationHistoryDao =
+        db.medicationHistoryDao()  // ← nuevo
 }

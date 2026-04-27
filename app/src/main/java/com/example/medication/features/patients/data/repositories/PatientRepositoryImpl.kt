@@ -5,9 +5,12 @@ import com.example.medication.features.patients.data.dataresources.remote.mapper
 import com.example.medication.features.patients.data.dataresources.remote.models.CreatePatientRequest
 import com.example.medication.features.patients.data.dataresources.remote.models.GeneratePatientLinkTokenRequest
 import com.example.medication.features.patients.data.dataresources.remote.models.GeneratePatientLinkTokenResponse
+import com.example.medication.features.patients.data.dataresources.remote.models.LinkAccountRequest
 import com.example.medication.features.patients.data.dataresources.remote.models.PatientDto
 import com.example.medication.features.patients.domain.entities.Patient
 import com.example.medication.features.patients.domain.repositories.PatientRepository
+import org.json.JSONObject
+import retrofit2.HttpException
 import javax.inject.Inject
 
 class PatientRepositoryImpl @Inject constructor(
@@ -34,6 +37,7 @@ class PatientRepositoryImpl @Inject constructor(
                 isActive = isActive
             )
         )
+
         return response.toDomain()
     }
 
@@ -41,7 +45,9 @@ class PatientRepositoryImpl @Inject constructor(
         caregiverUserId: String
     ): List<Patient> {
         return api.getPatientsByCaregiver(caregiverUserId)
-            .map { it.toDomain() }
+            .map { patientDto ->
+                patientDto.toDomain()
+            }
     }
 
     override suspend fun getPatientById(id: String): Patient {
@@ -62,6 +68,7 @@ class PatientRepositoryImpl @Inject constructor(
                 isActive = patient.isActive
             )
         )
+
         return response.toDomain()
     }
 
@@ -79,5 +86,43 @@ class PatientRepositoryImpl @Inject constructor(
                 caregiverUserId = caregiverUserId
             )
         )
+    }
+
+    override suspend fun linkAccount(
+        token: String,
+        userId: String
+    ): String {
+        return try {
+            val response = api.linkAccount(
+                LinkAccountRequest(
+                    token = token,
+                    userId = userId
+                )
+            )
+
+            response.patientId
+                ?: throw Exception("El servidor no devolvió el patientId")
+
+        } catch (e: HttpException) {
+            val errorMessage = try {
+                val errorBody = e.response()?.errorBody()?.string()
+
+                if (!errorBody.isNullOrBlank()) {
+                    val json = JSONObject(errorBody)
+
+                    when {
+                        json.has("message") -> json.getString("message")
+                        json.has("error") -> json.getString("error")
+                        else -> "Error del servidor (${e.code()})"
+                    }
+                } else {
+                    "Error del servidor (${e.code()})"
+                }
+            } catch (parseEx: Exception) {
+                "Error del servidor (${e.code()})"
+            }
+
+            throw Exception(errorMessage)
+        }
     }
 }

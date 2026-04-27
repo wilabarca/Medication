@@ -15,6 +15,7 @@ class JwtSessionManager @Inject constructor(
 ) {
     private val prefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 
+    // ── Token JWT ──────────────────────────────────────────────────────────────
     fun saveToken(token: String) {
         Log.d("JWT_DEBUG", "saveToken -> $token")
         prefs.edit().putString(KEY_TOKEN, token).apply()
@@ -30,7 +31,7 @@ class JwtSessionManager @Inject constructor(
         prefs.edit().remove(KEY_TOKEN).apply()
     }
 
-    // ── Decodifica el payload del JWT y extrae un campo ────────────────────────
+    // ── Decode payload ─────────────────────────────────────────────────────────
     private fun decodePayload(): JSONObject? {
         val token = getToken() ?: return null
         return try {
@@ -56,10 +57,8 @@ class JwtSessionManager @Inject constructor(
         return userId
     }
 
-    // ── Nuevo: obtener el rol directamente del token ───────────────────────────
     fun getRole(): String? {
         val payload = decodePayload() ?: return null
-        // Busca "role" o "roles" según lo que devuelva tu backend
         val role = when {
             payload.has("role")  -> payload.getString("role")
             payload.has("roles") -> payload.getString("roles")
@@ -71,7 +70,29 @@ class JwtSessionManager @Inject constructor(
 
     fun isLoggedIn(): Boolean = getToken() != null
 
+    // ── Paciente vinculado ─────────────────────────────────────────────────────
+    fun saveLinkedPatientId(patientId: String) {
+        Log.d("JWT_DEBUG", "saveLinkedPatientId -> $patientId")
+        prefs.edit().putString(KEY_LINKED_PATIENT_ID, patientId).apply()
+    }
+
+    fun getLinkedPatientId(): String? {
+        val id = prefs.getString(KEY_LINKED_PATIENT_ID, null)
+        Log.d("JWT_DEBUG", "getLinkedPatientId -> $id")
+        return id
+    }
+
+    fun clearLinkedPatientId() {
+        prefs.edit().remove(KEY_LINKED_PATIENT_ID).apply()
+    }
+
+    // ── Cerrar sesión completo ─────────────────────────────────────────────────
+    fun clearAll() {
+        prefs.edit().clear().apply()
+    }
+
     companion object {
-        private const val KEY_TOKEN = "auth_token"
+        private const val KEY_TOKEN             = "auth_token"
+        private const val KEY_LINKED_PATIENT_ID = "linked_patient_id"
     }
 }

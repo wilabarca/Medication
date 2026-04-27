@@ -2,245 +2,182 @@ package com.example.medication.core.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.medication.features.auth.presentation.screens.LoginScreen
 import com.example.medication.features.auth.presentation.screens.RegisterScreen
-import com.example.medication.features.favorites.presentation.screens.FavoritesScreen
-import com.example.medication.features.home.presentation.screens.HomeScreen
+import com.example.medication.features.auth.presentation.screens.RoleSelectorScreen
+import com.example.medication.features.caregiver.presentation.screens.CaregiverHomeScreen
+import com.example.medication.features.history.presentation.screens.HistoryScreen
 import com.example.medication.features.medication.domain.entities.Medication
 import com.example.medication.features.medication.presentation.screens.AlarmScreens
 import com.example.medication.features.medication.presentation.screens.EditMedicationScreen
 import com.example.medication.features.medication.presentation.screens.HomeMedicationScreen
 import com.example.medication.features.medication.presentation.screens.RegisterAlarmScreen
 import com.example.medication.features.medication.presentation.screens.RegisterMedicationScreen
+import com.example.medication.features.patients.domain.entities.Patient
 import com.example.medication.features.patients.presentation.screens.CreatePatientScreen
 import com.example.medication.features.patients.presentation.screens.PatientsListScreen
 import com.example.medication.features.searchmedication.presentation.screens.SearchMedicinesScreen
 import com.google.gson.Gson
 
 @Composable
-fun NavigationApp(
-    navigationViewModel: NavigationViewModel = hiltViewModel()
-) {
+fun NavigationApp() {
     val navController = rememberNavController()
-    val gson = remember { Gson() }
+    val gson          = Gson()
 
     NavHost(
-        navController = navController,
-        startDestination = Routes.LOGIN
+        navController    = navController,
+        startDestination = "RoleSelector"
     ) {
-        composable(Routes.LOGIN) {
+
+        // ── Selector de rol ────────────────────────────────────────────────────
+        composable("RoleSelector") {
+            RoleSelectorScreen(
+                // Cuidador → Login normal
+                onCaregiverSelected = { navController.navigate("Login/caregiver") },
+                // Paciente → directo al Home, sin login
+                onPatientSelected   = {
+                    navController.navigate("PatientHome") {
+                        popUpTo("RoleSelector") { inclusive = false }
+                    }
+                }
+            )
+        }
+
+        // ── Auth (solo cuidador) ───────────────────────────────────────────────
+        composable("Login/{expectedRole}") { backStackEntry ->
+            val expectedRole = backStackEntry.arguments?.getString("expectedRole") ?: "caregiver"
             LoginScreen(
                 onCaregiverLoginSuccess = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.LOGIN) {
-                            inclusive = true
-                        }
+                    navController.navigate("CaregiverHome") {
+                        popUpTo("RoleSelector") { inclusive = true }
+                    }
+                },
+                // El paciente nunca llega aquí, pero por si acaso
+                onPatientLoginSuccess = {
+                    navController.navigate("PatientHome") {
+                        popUpTo("RoleSelector") { inclusive = true }
+                    }
+                },
+                onRegistrar = { navController.navigate("Register/$expectedRole") }
+            )
+        }
+
+        // Ruta de login sin rol (fallback)
+        composable("Login") {
+            LoginScreen(
+                onCaregiverLoginSuccess = {
+                    navController.navigate("CaregiverHome") {
+                        popUpTo("RoleSelector") { inclusive = true }
                     }
                 },
                 onPatientLoginSuccess = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.LOGIN) {
-                            inclusive = true
-                        }
+                    navController.navigate("PatientHome") {
+                        popUpTo("RoleSelector") { inclusive = true }
                     }
                 },
-                onRegistrar = {
-                    navController.navigate(Routes.REGISTER)
-                }
+                onRegistrar = { navController.navigate("Register/caregiver") }
             )
         }
 
-        composable(Routes.REGISTER) {
+        composable("Register/{expectedRole}") {
             RegisterScreen(
                 onRegisterSuccess = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.REGISTER) {
-                            inclusive = true
-                        }
+                    navController.navigate("Login") {
+                        popUpTo("Register/{expectedRole}") { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(Routes.HOME) {
-            val userId = navigationViewModel.getUserId()
-            val role = navigationViewModel.getUserRole()
-
-            HomeScreen(
-                role = role,
-                userId = userId,
-                linkedPatientId = null,
-                onOpenPatientLinking = {
-                    navController.navigate(Routes.LINK_PATIENTS)
-                },
-                onOpenPatients = {
-                    navController.navigate(Routes.PATIENTS)
-                },
-                onCreatePatient = {
-                    navController.navigate(Routes.CREATE_PATIENT)
-                },
-                onOpenPatientMedications = { patientId ->
-                    navController.navigate(Routes.patientMedications(patientId))
-                },
-                onOpenPatientAlarms = {
-                    navController.navigate(Routes.ALARMS)
-                }
-            )
-        }
-
-        composable(Routes.PATIENTS) {
-            val caregiverUserId = navigationViewModel.getUserId()
-
-            PatientsListScreen(
-                caregiverUserId = caregiverUserId,
-                onCreatePatient = {
-                    navController.navigate(Routes.CREATE_PATIENT)
-                },
-                onPatientSelected = { patient ->
-                    navController.navigate(Routes.patientMedications(patient.id))
-                }
-            )
-        }
-
-        composable(Routes.CREATE_PATIENT) {
-            val caregiverUserId = navigationViewModel.getUserId()
-
-            CreatePatientScreen(
-                caregiverUserId = caregiverUserId,
-                onCreated = {
-                    navController.navigate(Routes.PATIENTS) {
-                        popUpTo(Routes.PATIENTS) {
-                            inclusive = true
-                        }
-                    }
-                },
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable(
-            route = Routes.PATIENT_MEDICATIONS,
-            arguments = listOf(
-                navArgument("patientId") {
-                    type = NavType.StringType
-                }
-            )
-        ) { backStackEntry ->
-            val patientId = backStackEntry.arguments?.getString("patientId")
-                ?: return@composable
-
+        // ── Home Paciente ──────────────────────────────────────────────────────
+        // El paciente llega aquí directamente desde RoleSelector.
+        // La vinculación con el cuidador ocurre DENTRO de esta pantalla
+        // a través del modal de token.
+        composable("PatientHome") {
             HomeMedicationScreen(
-                patientId = patientId,
-                canEdit = true,
-                onNavigateToRegister = { selectedPatientId ->
-                    navController.navigate(Routes.registerMedication(selectedPatientId))
-                },
-                onNavigateToSearch = {
-                    navController.navigate(Routes.SEARCH_MEDICINES)
-                },
-                onNavigateToFavorites = {
-                    navController.navigate(Routes.FAVORITES)
-                },
-                onNavigateToAlarm = {
-                    navController.navigate(Routes.ALARMS)
-                },
-                onNavigateToEdit = { medication ->
-                    val medicationJson = Uri.encode(gson.toJson(medication))
-                    navController.navigate(Routes.editMedication(medicationJson))
+                onNavigateToSearch   = { navController.navigate("SearchMedicines") },
+                onNavigateToHistory  = { navController.navigate("History") },
+                onNavigateToEdit     = { medication ->
+                    // readOnly=true en la card, así que este callback no se activa,
+                    // pero se deja por si se habilita edición en el futuro.
+                    val json = Uri.encode(gson.toJson(medication))
+                    navController.navigate("EditMedication/$json")
                 }
             )
         }
 
-        composable(
-            route = Routes.REGISTER_MEDICATION,
-            arguments = listOf(
-                navArgument("patientId") {
-                    type = NavType.StringType
+        // ── Home Cuidador ──────────────────────────────────────────────────────
+        composable("CaregiverHome") {
+            CaregiverHomeScreen(
+                onNavigateToCreatePatient = { navController.navigate("CreatePatient") },
+                onNavigateToPatientDetail = { patient ->
+                    val json = Uri.encode(gson.toJson(patient))
+                    navController.navigate("PatientDetail/$json")
                 }
             )
-        ) { backStackEntry ->
-            val patientId = backStackEntry.arguments?.getString("patientId")
-                ?: return@composable
+        }
 
+        composable("PatientDetail/{patient}") { backStackEntry ->
+            val json    = backStackEntry.arguments?.getString("patient") ?: return@composable
+            val patient = gson.fromJson(json, Patient::class.java)
+            PatientsListScreen(
+                caregiverUserId   = patient.caregiverUserId,
+                onCreatePatient   = { navController.navigate("CreatePatient") },
+                onPatientSelected = { selected ->
+                    val selectedJson = Uri.encode(gson.toJson(selected))
+                    navController.navigate("PatientDetail/$selectedJson")
+                }
+            )
+        }
+
+        composable("CreatePatient") {
+            CreatePatientScreen(
+                onBack    = { navController.popBackStack() },
+                onCreated = { navController.popBackStack() }
+            )
+        }
+
+        // ── Medicamentos (solo usadas por el cuidador) ─────────────────────────
+        composable("RegisterMedication") {
             RegisterMedicationScreen(
-                patientId = patientId,
-                onMedicationRegistered = {
-                    navController.popBackStack()
-                }
+                onMedicationRegistered = { navController.popBackStack() }
             )
         }
 
-        composable(
-            route = Routes.EDIT_MEDICATION,
-            arguments = listOf(
-                navArgument("medication") {
-                    type = NavType.StringType
-                }
-            )
-        ) { backStackEntry ->
-            val medicationJson = backStackEntry.arguments?.getString("medication")
-                ?: return@composable
-
-            val medication = gson.fromJson(
-                medicationJson,
-                Medication::class.java
-            )
-
+        composable("EditMedication/{medication}") { backStackEntry ->
+            val json       = backStackEntry.arguments?.getString("medication") ?: return@composable
+            val medication = gson.fromJson(json, Medication::class.java)
             EditMedicationScreen(
                 medication = medication,
-                onBack = {
-                    navController.popBackStack()
-                },
-                onUpdated = {
-                    navController.popBackStack()
-                }
+                onBack     = { navController.popBackStack() },
+                onUpdated  = { navController.popBackStack() }
             )
         }
 
-        composable(Routes.SEARCH_MEDICINES) {
-            SearchMedicinesScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
+        // ── Compartidas ────────────────────────────────────────────────────────
+        composable("History") {
+            HistoryScreen(onBack = { navController.popBackStack() })
         }
 
-        composable(Routes.FAVORITES) {
-            FavoritesScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
+        composable("SearchMedicines") {
+            SearchMedicinesScreen(onBack = { navController.popBackStack() })
         }
 
-        composable(Routes.ALARMS) {
+        // ── Alarmas (solo cuidador, pero se deja ruteada por si acaso) ─────────
+        composable("Alarms") {
             AlarmScreens(
-                onBack = {
-                    navController.popBackStack()
-                },
-                onAddAlarm = {
-                    navController.navigate(Routes.REGISTER_ALARM)
-                }
+                onBack     = { navController.popBackStack() },
+                onAddAlarm = { navController.navigate("RegisterAlarm") }
             )
         }
 
-        composable(Routes.REGISTER_ALARM) {
+        composable("RegisterAlarm") {
             RegisterAlarmScreen(
-                onBack = {
-                    navController.popBackStack()
-                },
-                onAlarmSaved = {
-                    navController.popBackStack()
-                }
+                onBack       = { navController.popBackStack() },
+                onAlarmSaved = { navController.popBackStack() }
             )
         }
     }

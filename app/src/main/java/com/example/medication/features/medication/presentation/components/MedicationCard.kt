@@ -28,7 +28,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.medication.features.medication.domain.entities.Medication
 import java.io.File
 
-// ── Paleta médica ──────────────────────────────────────────
 val MedBlue      = Color(0xFF1A73E8)
 val MedBlueSoft  = Color(0xFFD2E3FC)
 val MedGreen     = Color(0xFF1E8E3E)
@@ -43,34 +42,32 @@ val MedCard      = Color(0xFFFFFFFF)
 @Composable
 fun MedicationCard(
     medication: Medication,
-    canEdit: Boolean = true,
     onDelete: (String) -> Unit = {},
     onEdit: (Medication) -> Unit = {},
     isFavorite: Boolean = false,
-    onToggleFavorite: () -> Unit = {}
-){
-
+    onToggleFavorite: () -> Unit = {},
+    readOnly: Boolean = false  // ← nuevo parámetro
+) {
     var showDeleteDialog by remember { mutableStateOf(false) }
-    var expanded by remember { mutableStateOf(false) }
+    var expanded         by remember { mutableStateOf(false) }
 
-    // Animación de escala al aparecer
     val scale by animateFloatAsState(
-        targetValue = 1f,
+        targetValue   = 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "card_scale"
+        label         = "card_scale"
     )
 
-    // Animación estrella favorito
     val starScale by animateFloatAsState(
-        targetValue = if (isFavorite) 1.3f else 1f,
+        targetValue   = if (isFavorite) 1.3f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "star_scale"
+        label         = "star_scale"
     )
 
+    // ── Diálogo de confirmación de eliminación ─────────────────────
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            containerColor = MedCard,
+            containerColor   = MedCard,
             icon = {
                 Box(
                     modifier = Modifier
@@ -78,42 +75,53 @@ fun MedicationCard(
                         .background(MedRedSoft, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Rounded.Delete, contentDescription = null, tint = MedRed, modifier = Modifier.size(24.dp))
+                    Icon(
+                        Icons.Rounded.Delete,
+                        contentDescription = null,
+                        tint     = MedRed,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             },
             title = {
                 Text("Eliminar medicamento", fontWeight = FontWeight.Bold, fontSize = 18.sp)
             },
             text = {
-                Text("¿Eliminar \"${medication.name}\"? Esta acción no se puede deshacer.", color = Color(0xFF5F6368))
+                Text(
+                    "¿Eliminar \"${medication.name}\"? Esta acción no se puede deshacer.",
+                    color = Color(0xFF5F6368)
+                )
             },
             confirmButton = {
                 Button(
                     onClick = { showDeleteDialog = false; onDelete(medication.id) },
-                    colors = ButtonDefaults.buttonColors(containerColor = MedRed),
-                    shape = RoundedCornerShape(12.dp)
+                    colors  = ButtonDefaults.buttonColors(containerColor = MedRed),
+                    shape   = RoundedCornerShape(12.dp)
                 ) { Text("Eliminar", fontWeight = FontWeight.SemiBold) }
             },
             dismissButton = {
                 OutlinedButton(
                     onClick = { showDeleteDialog = false },
-                    shape = RoundedCornerShape(12.dp)
+                    shape   = RoundedCornerShape(12.dp)
                 ) { Text("Cancelar") }
             }
         )
     }
 
     Card(
-        modifier = Modifier
+        modifier  = Modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 6.dp)
             .scale(scale),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MedCard),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp, hoveredElevation = 8.dp)
+        shape     = RoundedCornerShape(20.dp),
+        colors    = CardDefaults.cardColors(containerColor = MedCard),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 3.dp,
+            hoveredElevation = 8.dp
+        )
     ) {
         Column {
-            // ── Franja de color superior ──────────────────
+            // ── Franja superior ────────────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -125,16 +133,19 @@ fun MedicationCard(
                     )
             )
 
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier            = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
 
-                // ── Foto ──────────────────────────────────
+                // ── Foto ───────────────────────────────────────────
                 medication.photoPath?.let { path ->
                     val file = File(path)
                     if (file.exists()) {
                         Image(
-                            painter = rememberAsyncImagePainter(Uri.fromFile(file)),
+                            painter            = rememberAsyncImagePainter(Uri.fromFile(file)),
                             contentDescription = "Foto de ${medication.name}",
-                            modifier = Modifier
+                            modifier           = Modifier
                                 .fillMaxWidth()
                                 .height(180.dp)
                                 .clip(RoundedCornerShape(14.dp)),
@@ -143,61 +154,126 @@ fun MedicationCard(
                     }
                 }
 
-                // ── Header: nombre + acciones ─────────────
+                // ── Header: nombre + acciones ──────────────────────
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier                = Modifier.fillMaxWidth(),
+                    horizontalArrangement   = Arrangement.SpaceBetween,
+                    verticalAlignment       = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier         = Modifier.weight(1f)
+                    ) {
                         Box(
-                            modifier = Modifier
+                            modifier         = Modifier
                                 .size(40.dp)
                                 .background(MedBlueSoft, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Rounded.Medication, contentDescription = null, tint = MedBlue, modifier = Modifier.size(22.dp))
+                            Icon(
+                                Icons.Rounded.Medication,
+                                contentDescription = null,
+                                tint     = MedBlue,
+                                modifier = Modifier.size(22.dp)
+                            )
                         }
                         Spacer(Modifier.width(10.dp))
                         Column {
-                            Text(medication.name, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF1A1A2E))
-                            Text(medication.form, fontSize = 12.sp, color = MedBlue, fontWeight = FontWeight.Medium)
+                            Text(
+                                medication.name,
+                                fontWeight = FontWeight.Bold,
+                                fontSize   = 16.sp,
+                                color      = Color(0xFF1A1A2E)
+                            )
+                            Text(
+                                medication.form,
+                                fontSize   = 12.sp,
+                                color      = MedBlue,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
                     }
 
-                    Row {
-                        // Estrella con animación bounce
-                        IconButton(onClick = onToggleFavorite) {
-                            Icon(
-                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                                contentDescription = "Favorito",
-                                tint = if (isFavorite) MedGold else Color(0xFFBDBDBD),
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .scale(starScale)
-                            )
-                        }
-                        IconButton(onClick = { onEdit(medication) }) {
-                            Icon(Icons.Rounded.Edit, contentDescription = "Editar", tint = MedBlue, modifier = Modifier.size(20.dp))
-                        }
-                        IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(Icons.Rounded.Delete, contentDescription = "Eliminar", tint = MedRed, modifier = Modifier.size(20.dp))
+                    // ── Botones solo si NO es readOnly ─────────────
+                    if (!readOnly) {
+                        Row {
+                            IconButton(onClick = onToggleFavorite) {
+                                Icon(
+                                    imageVector        = if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                                    contentDescription = "Favorito",
+                                    tint               = if (isFavorite) MedGold else Color(0xFFBDBDBD),
+                                    modifier           = Modifier.size(24.dp).scale(starScale)
+                                )
+                            }
+                            IconButton(onClick = { onEdit(medication) }) {
+                                Icon(
+                                    Icons.Rounded.Edit,
+                                    contentDescription = "Editar",
+                                    tint     = MedBlue,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            IconButton(onClick = { showDeleteDialog = true }) {
+                                Icon(
+                                    Icons.Rounded.Delete,
+                                    contentDescription = "Eliminar",
+                                    tint     = MedRed,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
                 }
 
                 HorizontalDivider(color = Color(0xFFF0F4FF), thickness = 1.dp)
 
-                // ── Chips de info ─────────────────────────
+                // ── Chips de info ──────────────────────────────────
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    MedChip(icon = Icons.Rounded.Science, text = medication.dosage, color = MedBlue, bg = MedBlueSoft)
-                    MedChip(icon = Icons.Rounded.Inventory2, text = "${medication.quantity} uds", color = MedGreen, bg = MedGreenSoft)
+                    MedChip(
+                        icon  = Icons.Rounded.Science,
+                        text  = medication.dosage,
+                        color = MedBlue,
+                        bg    = MedBlueSoft
+                    )
+                    MedChip(
+                        icon  = Icons.Rounded.Inventory2,
+                        text  = "${medication.quantity} uds",
+                        color = MedGreen,
+                        bg    = MedGreenSoft
+                    )
                     medication.price?.let {
-                        MedChip(icon = Icons.Rounded.AttachMoney, text = "$$it", color = Color(0xFF7B1FA2), bg = Color(0xFFF3E5F5))
+                        MedChip(
+                            icon  = Icons.Rounded.AttachMoney,
+                            text  = "$$it",
+                            color = Color(0xFF7B1FA2),
+                            bg    = Color(0xFFF3E5F5)
+                        )
                     }
                 }
 
-                // ── Estado activo ─────────────────────────
+                // ── Fechas ─────────────────────────────────────────
+                if (!medication.startDate.isNullOrBlank() || !medication.endDate.isNullOrBlank()) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        medication.startDate?.let {
+                            MedChip(
+                                icon  = Icons.Rounded.CalendarToday,
+                                text  = "Inicio: $it",
+                                color = Color(0xFF00796B),
+                                bg    = Color(0xFFE0F2F1)
+                            )
+                        }
+                        medication.endDate?.let {
+                            MedChip(
+                                icon  = Icons.Rounded.EventBusy,
+                                text  = "Fin: $it",
+                                color = Color(0xFFE65100),
+                                bg    = Color(0xFFFBE9E7)
+                            )
+                        }
+                    }
+                }
+
+                // ── Estado activo ──────────────────────────────────
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
@@ -209,37 +285,49 @@ fun MedicationCard(
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = if (medication.isActive) "Activo" else "Inactivo",
-                        fontSize = 12.sp,
-                        color = if (medication.isActive) MedGreen else Color(0xFF9E9E9E),
+                        text       = if (medication.isActive) "Activo" else "Inactivo",
+                        fontSize   = 12.sp,
+                        color      = if (medication.isActive) MedGreen else Color(0xFF9E9E9E),
                         fontWeight = FontWeight.Medium
                     )
                 }
 
-                // ── Expandible: indicaciones y notas ──────
-                val hasExtra = !medication.instructions.isNullOrBlank() || !medication.notes.isNullOrBlank()
+                // ── Expandible: indicaciones y notas ──────────────
+                val hasExtra = !medication.instructions.isNullOrBlank() ||
+                        !medication.notes.isNullOrBlank()
                 if (hasExtra) {
                     TextButton(
-                        onClick = { expanded = !expanded },
+                        onClick        = { expanded = !expanded },
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Text(
                             if (expanded) "Ver menos ▲" else "Ver más ▼",
-                            fontSize = 12.sp, color = MedBlue
+                            fontSize = 12.sp,
+                            color    = MedBlue
                         )
                     }
 
                     AnimatedVisibility(
                         visible = expanded,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+                        enter   = fadeIn() + expandVertically(),
+                        exit    = fadeOut() + shrinkVertically()
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             medication.instructions?.takeIf { it.isNotBlank() }?.let {
-                                MedInfoRow(icon = Icons.Rounded.Info, label = "Indicaciones", value = it, color = MedBlue)
+                                MedInfoRow(
+                                    icon  = Icons.Rounded.Info,
+                                    label = "Indicaciones",
+                                    value = it,
+                                    color = MedBlue
+                                )
                             }
                             medication.notes?.takeIf { it.isNotBlank() }?.let {
-                                MedInfoRow(icon = Icons.Rounded.Notes, label = "Notas", value = it, color = Color(0xFF7B1FA2))
+                                MedInfoRow(
+                                    icon  = Icons.Rounded.Notes,
+                                    label = "Notas",
+                                    value = it,
+                                    color = Color(0xFF7B1FA2)
+                                )
                             }
                         }
                     }
@@ -250,13 +338,18 @@ fun MedicationCard(
 }
 
 @Composable
-private fun MedChip(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String, color: Color, bg: Color) {
+private fun MedChip(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    text: String,
+    color: Color,
+    bg: Color
+) {
     Row(
         modifier = Modifier
             .background(bg, RoundedCornerShape(20.dp))
             .padding(horizontal = 10.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        verticalAlignment      = Alignment.CenterVertically,
+        horizontalArrangement  = Arrangement.spacedBy(4.dp)
     ) {
         Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(14.dp))
         Text(text, fontSize = 11.sp, color = color, fontWeight = FontWeight.SemiBold)
@@ -264,7 +357,12 @@ private fun MedChip(icon: androidx.compose.ui.graphics.vector.ImageVector, text:
 }
 
 @Composable
-private fun MedInfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, color: Color) {
+private fun MedInfoRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String,
+    color: Color
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
