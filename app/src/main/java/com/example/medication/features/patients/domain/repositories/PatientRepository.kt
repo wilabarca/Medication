@@ -25,13 +25,8 @@ interface PatientRepository {
 
     suspend fun deletePatient(id: String)
 
-    suspend fun generateLinkToken(
-        patientId: String,
-        caregiverUserId: String
-    ): GeneratePatientLinkTokenResponse
-
     suspend fun linkAccount(
         token: String,
         userId: String
-    ): String
+    ): String                              // ← retorna patientId
 }

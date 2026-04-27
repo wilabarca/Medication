@@ -3,8 +3,6 @@ package com.example.medication.features.patients.data.repositories
 import com.example.medication.features.patients.data.dataresources.remote.api.PatientsApi
 import com.example.medication.features.patients.data.dataresources.remote.mapper.toDomain
 import com.example.medication.features.patients.data.dataresources.remote.models.CreatePatientRequest
-import com.example.medication.features.patients.data.dataresources.remote.models.GeneratePatientLinkTokenRequest
-import com.example.medication.features.patients.data.dataresources.remote.models.GeneratePatientLinkTokenResponse
 import com.example.medication.features.patients.data.dataresources.remote.models.LinkAccountRequest
 import com.example.medication.features.patients.data.dataresources.remote.models.PatientDto
 import com.example.medication.features.patients.domain.entities.Patient
@@ -44,10 +42,7 @@ class PatientRepositoryImpl @Inject constructor(
     override suspend fun getPatientsByCaregiver(
         caregiverUserId: String
     ): List<Patient> {
-        return api.getPatientsByCaregiver(caregiverUserId)
-            .map { patientDto ->
-                patientDto.toDomain()
-            }
+        return api.getPatientsByCaregiver(caregiverUserId).map { it.toDomain() }
     }
 
     override suspend fun getPatientById(id: String): Patient {
@@ -56,7 +51,7 @@ class PatientRepositoryImpl @Inject constructor(
 
     override suspend fun updatePatient(patient: Patient): Patient {
         val response = api.updatePatient(
-            id = patient.id,
+            id      = patient.id,
             patient = PatientDto(
                 id = patient.id,
                 caregiverUserId = patient.caregiverUserId,
@@ -76,18 +71,6 @@ class PatientRepositoryImpl @Inject constructor(
         api.deletePatient(id)
     }
 
-    override suspend fun generateLinkToken(
-        patientId: String,
-        caregiverUserId: String
-    ): GeneratePatientLinkTokenResponse {
-        return api.generateLinkToken(
-            patientId = patientId,
-            request = GeneratePatientLinkTokenRequest(
-                caregiverUserId = caregiverUserId
-            )
-        )
-    }
-
     override suspend fun linkAccount(
         token: String,
         userId: String
@@ -95,24 +78,22 @@ class PatientRepositoryImpl @Inject constructor(
         return try {
             val response = api.linkAccount(
                 LinkAccountRequest(
-                    token = token,
+                    token  = token,
                     userId = userId
                 )
             )
-
             response.patientId
                 ?: throw Exception("El servidor no devolvió el patientId")
 
         } catch (e: HttpException) {
+            // ── Extrae el mensaje real del body del servidor ────────────────
             val errorMessage = try {
                 val errorBody = e.response()?.errorBody()?.string()
-
                 if (!errorBody.isNullOrBlank()) {
                     val json = JSONObject(errorBody)
-
                     when {
                         json.has("message") -> json.getString("message")
-                        json.has("error") -> json.getString("error")
+                        json.has("error")   -> json.getString("error")
                         else -> "Error del servidor (${e.code()})"
                     }
                 } else {
@@ -121,7 +102,6 @@ class PatientRepositoryImpl @Inject constructor(
             } catch (parseEx: Exception) {
                 "Error del servidor (${e.code()})"
             }
-
             throw Exception(errorMessage)
         }
     }
