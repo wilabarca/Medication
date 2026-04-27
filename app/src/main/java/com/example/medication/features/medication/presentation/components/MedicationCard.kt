@@ -43,11 +43,13 @@ val MedCard      = Color(0xFFFFFFFF)
 @Composable
 fun MedicationCard(
     medication: Medication,
+    canEdit: Boolean = true,
     onDelete: (String) -> Unit = {},
     onEdit: (Medication) -> Unit = {},
     isFavorite: Boolean = false,
     onToggleFavorite: () -> Unit = {}
-) {
+){
+
     var showDeleteDialog by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
 

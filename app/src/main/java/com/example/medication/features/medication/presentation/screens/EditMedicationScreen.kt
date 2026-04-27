@@ -92,16 +92,17 @@ fun EditMedicationScreen(
                         val priceDouble = price.toDoubleOrNull()
 
                         viewModel.updateMedication(
-                            id           = medication.id,
-                            name         = name,
-                            dosage       = dosage,
-                            form         = form,
+                            id = medication.id,
+                            patientId = medication.patientId,
+                            name = name,
+                            dosage = dosage,
+                            form = form,
                             instructions = instructions,
-                            notes        = notes,
-                            quantity     = quantityInt,
-                            price        = priceDouble,
-                            isActive     = isActive,
-                            photoPath    = photoPath
+                            notes = notes,
+                            quantity = quantityInt,
+                            price = priceDouble,
+                            isActive = isActive,
+                            photoPath = photoPath
                         )
                         // NO llamamos onUpdated() aquí — esperamos a que isSuccess sea true
                     }

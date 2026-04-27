@@ -1,6 +1,8 @@
 package com.example.medication.features.patients.data.dataresources.remote.api
 
 import com.example.medication.features.patients.data.dataresources.remote.models.CreatePatientRequest
+import com.example.medication.features.patients.data.dataresources.remote.models.GeneratePatientLinkTokenRequest
+import com.example.medication.features.patients.data.dataresources.remote.models.GeneratePatientLinkTokenResponse
 import com.example.medication.features.patients.data.dataresources.remote.models.PatientDto
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -10,6 +12,7 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface PatientsApi {
+
     @POST("patients/")
     suspend fun createPatient(
         @Body request: CreatePatientRequest
@@ -35,4 +38,10 @@ interface PatientsApi {
     suspend fun deletePatient(
         @Path("id") id: String
     )
+
+    @POST("patients/{patientId}/link-token")
+    suspend fun generateLinkToken(
+        @Path("patientId") patientId: String,
+        @Body request: GeneratePatientLinkTokenRequest
+    ): GeneratePatientLinkTokenResponse
 }

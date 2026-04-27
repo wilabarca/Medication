@@ -15,9 +15,10 @@ import com.example.medication.features.medication.presentation.viewmodels.Regist
 
 @Composable
 fun RegisterMedicationScreen(
+    patientId: String,
     viewModel: RegisterMedicationViewModel = hiltViewModel(),
     onMedicationRegistered: () -> Unit = {}
-) {
+){
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -83,6 +84,7 @@ fun RegisterMedicationScreen(
                                 // cantidad inválida — no guarda
                             }
                             else -> viewModel.registerMedication(
+                                patientId = patientId,
                                 name         = name,
                                 dosage       = dosage,
                                 form         = form,

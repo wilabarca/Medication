@@ -1,5 +1,6 @@
 package com.example.medication.features.patients.domain.repositories
 
+import com.example.medication.features.patients.data.dataresources.remote.models.GeneratePatientLinkTokenResponse
 import com.example.medication.features.patients.domain.entities.Patient
 
 interface PatientRepository {
@@ -20,4 +21,5 @@ interface PatientRepository {
     suspend fun updatePatient(patient: Patient): Patient
 
     suspend fun deletePatient(id: String)
+    suspend fun generateLinkToken( patientId: String, caregiverUserId: String): GeneratePatientLinkTokenResponse
 }

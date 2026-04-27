@@ -42,7 +42,6 @@ fun RegisterScreen(
         }
     }
 
-    // Diálogo de éxito
     if (showSuccessDialog) {
         AlertDialog(
             onDismissRequest = {},
@@ -107,7 +106,8 @@ fun RegisterScreen(
                     name = usuario,
                     email = correo,
                     password = contrasena,
-                    repeatPassword = repetirContrasena
+                    repeatPassword = repetirContrasena,
+                    role = "caregiver"
                 )
             }
         )

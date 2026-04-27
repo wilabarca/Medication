@@ -3,6 +3,8 @@ package com.example.medication.features.patients.data.repositories
 import com.example.medication.features.patients.data.dataresources.remote.api.PatientsApi
 import com.example.medication.features.patients.data.dataresources.remote.mapper.toDomain
 import com.example.medication.features.patients.data.dataresources.remote.models.CreatePatientRequest
+import com.example.medication.features.patients.data.dataresources.remote.models.GeneratePatientLinkTokenRequest
+import com.example.medication.features.patients.data.dataresources.remote.models.GeneratePatientLinkTokenResponse
 import com.example.medication.features.patients.data.dataresources.remote.models.PatientDto
 import com.example.medication.features.patients.domain.entities.Patient
 import com.example.medication.features.patients.domain.repositories.PatientRepository
@@ -24,12 +26,12 @@ class PatientRepositoryImpl @Inject constructor(
         val response = api.createPatient(
             CreatePatientRequest(
                 caregiverUserId = caregiverUserId,
-                linkedUserId    = linkedUserId,
-                name            = name,
-                birthDate       = birthDate,
-                relationship    = relationship,
-                notes           = notes,
-                isActive        = isActive
+                linkedUserId = linkedUserId,
+                name = name,
+                birthDate = birthDate,
+                relationship = relationship,
+                notes = notes,
+                isActive = isActive
             )
         )
         return response.toDomain()
@@ -50,14 +52,14 @@ class PatientRepositoryImpl @Inject constructor(
         val response = api.updatePatient(
             id = patient.id,
             patient = PatientDto(
-                id              = patient.id,
+                id = patient.id,
                 caregiverUserId = patient.caregiverUserId,
-                linkedUserId    = patient.linkedUserId,
-                name            = patient.name,
-                birthDate       = patient.birthDate,
-                relationship    = patient.relationship,
-                notes           = patient.notes,
-                isActive        = patient.isActive
+                linkedUserId = patient.linkedUserId,
+                name = patient.name,
+                birthDate = patient.birthDate,
+                relationship = patient.relationship,
+                notes = patient.notes,
+                isActive = patient.isActive
             )
         )
         return response.toDomain()
@@ -65,5 +67,17 @@ class PatientRepositoryImpl @Inject constructor(
 
     override suspend fun deletePatient(id: String) {
         api.deletePatient(id)
+    }
+
+    override suspend fun generateLinkToken(
+        patientId: String,
+        caregiverUserId: String
+    ): GeneratePatientLinkTokenResponse {
+        return api.generateLinkToken(
+            patientId = patientId,
+            request = GeneratePatientLinkTokenRequest(
+                caregiverUserId = caregiverUserId
+            )
+        )
     }
 }

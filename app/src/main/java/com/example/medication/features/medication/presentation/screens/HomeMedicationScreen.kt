@@ -29,7 +29,9 @@ import com.example.medication.features.medication.presentation.viewmodels.HomeVi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeMedicationScreen(
-    onNavigateToRegister: () -> Unit = {},
+    patientId: String,
+    canEdit: Boolean,
+    onNavigateToRegister: (String) -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToAlarm: () -> Unit = {},
@@ -41,14 +43,18 @@ fun HomeMedicationScreen(
     val favoritesMap by favoritesViewModel.favoritesMap.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner, patientId) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.getMedications()
+                viewModel.getMedications(patientId)
             }
         }
+
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     Scaffold(
@@ -72,18 +78,21 @@ fun HomeMedicationScreen(
         floatingActionButton = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 FloatingActionButton(
-                    onClick        = onNavigateToAlarm,
+                    onClick = onNavigateToAlarm,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor   = MaterialTheme.colorScheme.onPrimary
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(Icons.Default.Alarm, contentDescription = "Alarma")
                 }
-                FloatingActionButton(
-                    onClick        = onNavigateToRegister,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor   = MaterialTheme.colorScheme.onPrimary
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Agregar")
+
+                if (canEdit) {
+                    FloatingActionButton(
+                        onClick = { onNavigateToRegister(patientId) },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Agregar")
+                    }
                 }
             }
         }
@@ -131,13 +140,14 @@ fun HomeMedicationScreen(
                                 favoritesViewModel.checkIsFavorite(medication.id)
                             }
                             MedicationCard(
-                                medication      = medication,
-                                isFavorite      = favoritesMap[medication.id] ?: false,
+                                medication = medication,
+                                canEdit = canEdit,
+                                isFavorite = favoritesMap[medication.id] ?: false,
                                 onToggleFavorite = {
                                     favoritesViewModel.toggleFavorite(medication)
                                 },
                                 onDelete = { id ->
-                                    viewModel.deleteMedication(id)
+                                    viewModel.deleteMedication(id, patientId)
                                 },
                                 onEdit = { med ->
                                     onNavigateToEdit(med)
